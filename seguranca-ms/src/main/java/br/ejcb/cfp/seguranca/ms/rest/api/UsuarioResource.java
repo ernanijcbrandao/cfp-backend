@@ -5,6 +5,7 @@ import java.util.List;
 import br.ejcb.cfp.seguranca.ms.rest.dto.UsuarioDTO;
 import br.ejcb.cfp.seguranca.ms.service.UsuarioService;
 import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -13,12 +14,8 @@ import jakarta.ws.rs.core.MediaType;
 @Path("/v1/usuarios")
 public class UsuarioResource {
 
+	@Inject
 	private UsuarioService service;
-	
-	public UsuarioResource(UsuarioService service) {
-		this.service = service;
-	}
-	
 	
     @GET
     @Produces(MediaType.APPLICATION_JSON)

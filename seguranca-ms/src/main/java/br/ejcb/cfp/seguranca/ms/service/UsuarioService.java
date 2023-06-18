@@ -13,15 +13,11 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class UsuarioService {
 
-	private UsuarioRepository repository;
-
 	@Inject
-	public UsuarioService(UsuarioRepository repository) {
-		this.repository = repository;
-	}
+	UsuarioRepository repository;
 
 	public Uni<List<UsuarioDTO>> listarUsuariosAtivos() {
-		return repository.listAll()
+		return repository.buscarTodosUsuariosAtivo()
 				.map(entityList -> entityList.stream()
 						.map(UsuarioConverter::toDTO)
 						.collect(Collectors.toList()));

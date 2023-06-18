@@ -1,8 +1,8 @@
-package br.ejcb.cfp.financeiro.ms.rest.api;
+package br.ejcb.cfp.seguranca.ms.rest.api;
 
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
 @QuarkusIntegrationTest
-public class AccountResourceIT extends AccountResourceTest {
+public class UsuarioResourceIT extends UsuarioResourceTest {
     // Execute the same tests but in packaged mode.
 }

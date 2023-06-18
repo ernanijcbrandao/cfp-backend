@@ -32,7 +32,7 @@ import lombok.With;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Usuario { // extends PanacheEntityBase {
+public class Usuario { // extends PanacheEntity {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
