@@ -30,6 +30,8 @@ public class UsuarioDTO {
 	@NotNull(message = CONSTRAINT_FIELD_ID_NOT_NULL)
 	private Long id;
 	
+	private String chave;
+	
 	@Size(min = 5, max = 100, message = CONSTRAINT_FIELD_NOME_SIZE)
 	private String nome;
 	

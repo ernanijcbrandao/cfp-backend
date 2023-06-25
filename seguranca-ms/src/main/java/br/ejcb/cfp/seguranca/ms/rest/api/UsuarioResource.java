@@ -40,7 +40,7 @@ public class UsuarioResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<UsuarioDTO> incluir(@Valid @NotNull final NovoUsuarioDTO dto) {
-    	return service.gravar(UsuarioConverter.toEntity(dto));
+    	return null; // service.gravar(UsuarioConverter.toEntity(dto));
     }
 
     /*
