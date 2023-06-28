@@ -1,6 +1,7 @@
 package br.ejcb.cfp.seguranca.ms.rest.api;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import br.ejcb.cfp.seguranca.ms.converters.UsuarioConverter;
 import br.ejcb.cfp.seguranca.ms.rest.dto.NovoUsuarioDTO;
@@ -26,21 +27,24 @@ public class UsuarioResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<List<UsuarioDTO>> listarSomenteAtivos() {
-        return service.listarSomenteAtivos();
+        return service.listarSomenteAtivos().map(entityList -> entityList.stream()
+				.map(UsuarioConverter::toDTO)
+				.collect(Collectors.toList()));
     }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<UsuarioDTO> carregar(final Long id) {
-        return service.carregar(id);
+        return service.carregar(id).map(UsuarioConverter::toDTO);
     }
     
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<UsuarioDTO> incluir(@Valid @NotNull final NovoUsuarioDTO dto) {
-    	return null; // service.gravar(UsuarioConverter.toEntity(dto));
+    public Uni<UsuarioDTO> criar(@Valid @NotNull final NovoUsuarioDTO dto) {
+    	return service.criar(UsuarioConverter.toEntity(dto))
+				.map(UsuarioConverter::toDTO);
     }
 
     /*
