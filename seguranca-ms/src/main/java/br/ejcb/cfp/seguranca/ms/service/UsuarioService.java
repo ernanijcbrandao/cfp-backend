@@ -11,6 +11,7 @@ import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -50,10 +51,8 @@ public class UsuarioService {
 							.withPerfil(entity.getPerfil())
 							.withAtivo(entity.getAtivo())
 							);
-				});
-//				.onItem().ifNull().failWith(() -> {
-//                    throw new Exception("Registro não encontrado para o ID: ");
-//                });
+				})
+				.onItem().ifNull().failWith(() -> new EntityNotFoundException());
 	}
 	
 }
