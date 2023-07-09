@@ -1,5 +1,6 @@
 package br.ejcb.cfp.seguranca.ms.rest.exceptions;
 
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
 import jakarta.ws.rs.core.Response;
@@ -14,6 +15,7 @@ public class TratamentoExcecoes implements ExceptionMapper<Exception> {
 		
 		Response response = tratarExcecaoDeValidacao(null, exception);
 		response = tratarExcecaoDeRegistroNaoEncontrado(response, exception);
+		response = tratarExcecaoDeRegistroJaEncontrado(response, exception);
 		
 		response = tratarExcecaoFalhaInesperada(response, exception);
 		
@@ -23,7 +25,7 @@ public class TratamentoExcecoes implements ExceptionMapper<Exception> {
 	private Response tratarExcecaoDeValidacao(Response response, Exception exception) {
 		if (response == null && exception instanceof ValidationException) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Erro de validação")
+                    .entity("Erro de validação: " + exception.getMessage())
                     .build();
 		}
         return null;
@@ -33,6 +35,15 @@ public class TratamentoExcecoes implements ExceptionMapper<Exception> {
 		if (response == null && exception instanceof EntityNotFoundException) {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity("Registro não encontrado")
+                    .build();
+        }
+        return null;
+	}
+	
+	private Response tratarExcecaoDeRegistroJaEncontrado(Response response, Exception exception) {
+		if (response == null && exception instanceof EntityExistsException) {
+            return Response.status(Response.Status.NOT_ACCEPTABLE)
+                    .entity("Registro já existe")
                     .build();
         }
         return null;

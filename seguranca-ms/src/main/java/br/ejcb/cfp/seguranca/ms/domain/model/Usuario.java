@@ -55,7 +55,7 @@ public class Usuario { // extends PanacheEntity {
 	@NotNull
 	private LocalDate dataCriacao;
 	
-	@Column(name = "ativo", nullable = false, insertable = true, updatable = true)
+	@Column(name = "fg_ativo", nullable = false, insertable = true, updatable = true)
 	@NotNull
 	private Boolean ativo;
 	
@@ -64,6 +64,16 @@ public class Usuario { // extends PanacheEntity {
 	@NotNull
 	private Perfil perfil;
 	
+
+	@Column(name = "fg_bloqueio", nullable = true, insertable = true, updatable = true)
+	private Boolean bloqueado; 
+	
+	@Column(name = "fg_senha_bloqueada", nullable = true, insertable = true, updatable = true)
+	private Boolean senhaExpirada; 
+	
+	@Column(name = "erro_sequencia", nullable = false, insertable = true, updatable = true)
+	private Integer errosEmSequencia; 
+	
 	
 	public static synchronized Usuario create() {
 		return new Usuario();
@@ -71,6 +81,17 @@ public class Usuario { // extends PanacheEntity {
 	
 	public boolean isNew() {
 		return this.id == null;
+	}
+	
+	// auxiliares
+	public Usuario incrementarErroEmSequencia() {
+		errosEmSequencia = errosEmSequencia != null && errosEmSequencia > -1
+				? errosEmSequencia++ : 1;
+		return this;
+	}
+	public Usuario zerarContadorErroEmSequencia() {
+		errosEmSequencia = 0;
+		return this;
 	}
 
 }

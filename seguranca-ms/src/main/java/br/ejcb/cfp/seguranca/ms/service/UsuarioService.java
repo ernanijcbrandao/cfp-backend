@@ -6,11 +6,13 @@ import java.util.List;
 
 import br.ejcb.cfp.seguranca.ms.domain.model.Usuario;
 import br.ejcb.cfp.seguranca.ms.domains.repository.UsuarioRepository;
+import br.ejcb.cfp.seguranca.ms.util.ConfiguracaoUtil;
 import br.ejcb.cfp.seguranca.ms.util.SegurancaUtil;
 import io.quarkus.hibernate.reactive.panache.common.WithTransaction;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -20,6 +22,12 @@ public class UsuarioService {
 
 	@Inject
 	UsuarioRepository repository;
+	
+	@Inject
+	SegurancaUtil segurancaUtil;
+
+	@Inject
+	ConfiguracaoUtil configUtil;
 
 	public Uni<List<Usuario>> listarSomenteAtivos() {
 		return repository.listarSomenteAtivos();
@@ -35,16 +43,27 @@ public class UsuarioService {
 
 	@WithTransaction
 	public Uni<Usuario> criar(@Valid @NotNull Usuario entity) {
-		return repository.persistAndFlush(entity.withAtivo(Boolean.TRUE)
-				.withDataCriacao(LocalDate.now(ZoneId.of("America/Sao_Paulo")))
-				.withChave(SegurancaUtil.gerarChave(entity.getLogin(), entity.getNome())));
+		return repository.carregar(entity.getLogin())
+				.onItem()
+				.ifNotNull()
+				.failWith(() -> new EntityExistsException())
+				.onItem()
+				.transformToUni(usuario -> {
+					return repository.persistAndFlush(entity
+							.withAtivo(Boolean.TRUE)
+							.withDataCriacao(LocalDate.now(ZoneId.of("America/Sao_Paulo")))
+							.withErrosEmSequencia(0)
+							.withChave(segurancaUtil.gerarChave(entity.getLogin(), entity.getNome()))
+							.withBloqueado(Boolean.FALSE)
+							.withSenhaExpirada(Boolean.FALSE)
+							);
+				});
 	}
 
 	@WithTransaction
-	public Uni<Usuario> atualizar(@Valid @NotNull Long id, @NotNull Usuario entity) throws Exception{
+	public Uni<Usuario> atualizar(@Valid @NotNull Long id, @NotNull Usuario entity) {
 		return repository.findById(id)
-				.onItem()
-				.ifNotNull()
+				.onItem().ifNotNull()
 				.transformToUni(usuario -> {
 					return repository.persist(usuario
 							.withNome(entity.getNome())
@@ -53,6 +72,28 @@ public class UsuarioService {
 							);
 				})
 				.onItem().ifNull().failWith(() -> new EntityNotFoundException());
+	}
+
+	@WithTransaction
+	public Uni<Void> excluir(@Valid @NotNull Long id) {
+		/* caso exista, apenas inativar - exclusao logica */
+		return repository.findById(id)
+				.onItem()
+				.ifNotNull()
+				.transformToUni(usuario -> {
+					repository.persist(usuario
+							.withAtivo(Boolean.FALSE));
+					return Uni.createFrom().voidItem();
+				})
+				.onItem().ifNull().failWith(() -> new EntityNotFoundException());
+	}
+
+	@WithTransaction
+	public Uni<Usuario> gravarTentativaAcessoSemSucesso(@Valid @NotNull Usuario entity) {
+		entity.setErrosEmSequencia(entity.getErrosEmSequencia()>-1?entity.getErrosEmSequencia()+1:1);
+		boolean bloqueado = entity.getBloqueado() 
+				|| configUtil.bloquearPorErrosEmSequencia(entity.getErrosEmSequencia());
+		return repository.persistAndFlush(entity.withBloqueado(bloqueado));
 	}
 	
 }
