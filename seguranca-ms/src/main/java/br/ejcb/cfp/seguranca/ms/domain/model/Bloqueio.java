@@ -38,11 +38,17 @@ public class Bloqueio { //extends PanacheEntityBase {
 				foreignKey = @ForeignKey(name = "fk_bloqueio_usuario"))
 	private Usuario usuario;
 	
-	@Column(name = "data_hora", nullable = false, insertable = true, updatable = false)
-	private LocalDateTime dataBloqueio;
+	@Column(name = "dh_bloqueio", nullable = false, insertable = true, updatable = false)
+	private LocalDateTime dataHoraBloqueio;
+	
+	@Column(name = "dh_expiracao", nullable = true, insertable = true, updatable = false)
+	private LocalDateTime dataHoraExpiracaoBloqueio;
 	
 	@Column(name = "motivo", length = 200, nullable = false, insertable = true, updatable = false)
 	private String motivo;
+	
+	@Column(name = "fg_ativo", nullable = false, insertable = true, updatable = true)
+	private Boolean ativo;
 	
 	public static synchronized Bloqueio create() {
 		return new Bloqueio();
