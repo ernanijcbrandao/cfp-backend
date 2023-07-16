@@ -23,11 +23,8 @@ public class SegurancaResource {
     @Path("/autenticacao")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<UsuarioAutenticadoDTO> criar(@Valid @NotNull final AutenticacaoDTO dto) {
-    	service.autenticar(dto);
-    	return null;
-//    	return service.criar(UsuarioConverter.toEntity(dto))
-//				.map(UsuarioConverter::toDTO);
+    public Uni<UsuarioAutenticadoDTO> autenticar(@Valid @NotNull final AutenticacaoDTO dto) {
+    	return service.autenticar(dto);
     }
 
     /*
