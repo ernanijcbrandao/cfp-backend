@@ -65,11 +65,11 @@ public class Usuario { // extends PanacheEntity {
 	private Perfil perfil;
 	
 
-	@Column(name = "fg_bloqueio", nullable = true, insertable = true, updatable = true)
-	private Boolean bloqueado; 
+//	@Column(name = "fg_bloqueio", nullable = true, insertable = true, updatable = true)
+//	private Boolean bloqueado; 
 	
-	@Column(name = "fg_senha_bloqueada", nullable = true, insertable = true, updatable = true)
-	private Boolean senhaExpirada; 
+//	@Column(name = "fg_senha_bloqueada", nullable = true, insertable = true, updatable = true)
+//	private Boolean senhaExpirada; 
 	
 	@Column(name = "erro_sequencia", nullable = false, insertable = true, updatable = true)
 	private Integer errosEmSequencia; 

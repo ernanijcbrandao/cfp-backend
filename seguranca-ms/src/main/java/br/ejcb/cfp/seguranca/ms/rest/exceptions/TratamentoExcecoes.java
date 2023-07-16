@@ -1,5 +1,6 @@
 package br.ejcb.cfp.seguranca.ms.rest.exceptions;
 
+import br.ejcb.cfp.seguranca.ms.service.exceptions.SegurancaException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
@@ -16,6 +17,7 @@ public class TratamentoExcecoes implements ExceptionMapper<Exception> {
 		Response response = tratarExcecaoDeValidacao(null, exception);
 		response = tratarExcecaoDeRegistroNaoEncontrado(response, exception);
 		response = tratarExcecaoDeRegistroJaEncontrado(response, exception);
+		response = tratarExcecaoDeSeguranca(response, exception);
 		
 		response = tratarExcecaoFalhaInesperada(response, exception);
 		
@@ -44,6 +46,15 @@ public class TratamentoExcecoes implements ExceptionMapper<Exception> {
 		if (response == null && exception instanceof EntityExistsException) {
             return Response.status(Response.Status.NOT_ACCEPTABLE)
                     .entity("Registro já existe")
+                    .build();
+        }
+        return null;
+	}
+	
+	private Response tratarExcecaoDeSeguranca(Response response, Exception exception) {
+		if (response == null && exception instanceof SegurancaException) {
+            return Response.status(Response.Status.FORBIDDEN)
+                    .entity(exception.getMessage())
                     .build();
         }
         return null;

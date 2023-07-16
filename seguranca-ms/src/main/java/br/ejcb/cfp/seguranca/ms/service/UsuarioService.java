@@ -54,8 +54,8 @@ public class UsuarioService {
 							.withDataCriacao(LocalDate.now(ZoneId.of("America/Sao_Paulo")))
 							.withErrosEmSequencia(0)
 							.withChave(segurancaUtil.gerarChave(entity.getLogin(), entity.getNome()))
-							.withBloqueado(Boolean.FALSE)
-							.withSenhaExpirada(Boolean.FALSE)
+//							.withBloqueado(Boolean.FALSE)
+//							.withSenhaExpirada(Boolean.FALSE)
 							);
 				});
 	}
@@ -89,11 +89,14 @@ public class UsuarioService {
 	}
 
 	@WithTransaction
-	public Uni<Usuario> gravarTentativaAcessoSemSucesso(@Valid @NotNull Usuario entity) {
+	public Uni<Usuario> registrarTentativaAcessoSemSucesso(@Valid @NotNull Usuario entity) {
 		entity.setErrosEmSequencia(entity.getErrosEmSequencia()>-1?entity.getErrosEmSequencia()+1:1);
-		boolean bloqueado = entity.getBloqueado() 
-				|| configUtil.bloquearPorErrosEmSequencia(entity.getErrosEmSequencia());
-		return repository.persistAndFlush(entity.withBloqueado(bloqueado));
+		return repository.persistAndFlush(entity);
+	}
+	
+	@WithTransaction
+	public Uni<Usuario> registrarAcessoComSucesso(@Valid @NotNull Usuario entity) {
+		return repository.persistAndFlush(entity.zerarContadorErroEmSequencia());
 	}
 	
 }

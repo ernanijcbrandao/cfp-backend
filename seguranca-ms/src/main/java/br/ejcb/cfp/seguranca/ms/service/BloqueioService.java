@@ -12,11 +12,15 @@ public class BloqueioService {
 	@Inject
 	BloqueioRepository repository;
 
-	public Uni<Boolean> tratarBloqueiosAtivos(final Usuario usuario) {
-		return null;
-//				Uni.createFrom().item(() -> {
-//			
-//		});
+	public Uni<Boolean> possuiBloqueioAtivo(final Usuario usuario) {
+		return repository.countBloqueiosAtivos(usuario)
+				.onItem().transformToUni(total -> {
+					if (total == 0) {
+						return Uni.createFrom().item(false);
+					}
+					return repository.limparBloqueiosTemporariosExpiradosEAtivos(usuario)
+							.onItem().transformToUni(atualizado -> Uni.createFrom().item(total != Long.valueOf(atualizado)));
+				});
 	}
 
 }
