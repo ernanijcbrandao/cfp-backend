@@ -54,8 +54,6 @@ public class UsuarioService {
 							.withDataCriacao(LocalDate.now(ZoneId.of("America/Sao_Paulo")))
 							.withErrosEmSequencia(0)
 							.withChave(segurancaUtil.gerarChave(entity.getLogin(), entity.getNome()))
-//							.withBloqueado(Boolean.FALSE)
-//							.withSenhaExpirada(Boolean.FALSE)
 							);
 				});
 	}

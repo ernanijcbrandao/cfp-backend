@@ -16,6 +16,9 @@ public class ConfiguracaoUtil {
 	@ConfigProperty(name = "seguranca.bloqueio.erros.sequencia", defaultValue="3")
 	private Integer quantidadeErrosEmSequenciaParaBloqueioUsuario;
 
+	@ConfigProperty(name = "seguranca.timeout.usuario.autenticado", defaultValue="30")
+	private Integer timeoutUsuarioAutenticado;
+
 
 	public Integer getDiasParaExpiracaoSenha() {
 		return diasParaExpiracaoSenha > 0
@@ -35,4 +38,10 @@ public class ConfiguracaoUtil {
 		return valor >= getQuantidadeErrosEmSequenciaParaBloqueioUsuario();
 	}
 
+	public Integer getTimeoutUsuarioAutenticado() {
+		return timeoutUsuarioAutenticado > 0
+				? timeoutUsuarioAutenticado : 30;
+	}
+
+	
 }

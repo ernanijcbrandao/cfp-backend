@@ -13,7 +13,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/v1/seguranca")
+@Path("/api/v1/seguranca")
 public class SegurancaResource {
 
 	@Inject

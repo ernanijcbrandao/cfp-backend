@@ -8,6 +8,7 @@ import br.ejcb.cfp.seguranca.ms.rest.dto.NovoUsuarioDTO;
 import br.ejcb.cfp.seguranca.ms.rest.dto.UsuarioDTO;
 import br.ejcb.cfp.seguranca.ms.service.UsuarioService;
 import io.smallrye.mutiny.Uni;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -20,7 +21,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
-@Path("/v1/usuarios")
+@Path("/api/v1/usuarios")
 public class UsuarioResource {
 
 	@Inject
@@ -28,6 +29,7 @@ public class UsuarioResource {
 	
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("ADMIN")
     public Uni<List<UsuarioDTO>> listarSomenteAtivos() {
         return service.listarSomenteAtivos().map(entityList -> entityList.stream()
 				.map(UsuarioConverter::toDTO)
@@ -37,6 +39,7 @@ public class UsuarioResource {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("ADMIN")
     public Uni<UsuarioDTO> carregar(final Long id) {
         return service.carregar(id).map(UsuarioConverter::toDTO);
     }
@@ -44,6 +47,7 @@ public class UsuarioResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("ADMIN")
     public Uni<UsuarioDTO> criar(@Valid @NotNull final NovoUsuarioDTO dto) {
     	return service.criar(UsuarioConverter.toEntity(dto))
 				.map(UsuarioConverter::toDTO);
@@ -53,6 +57,7 @@ public class UsuarioResource {
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("ADMIN")
     public Uni<UsuarioDTO> atualizar(@Valid @NotNull Long id, @Valid @NotNull final UsuarioDTO dto) {
     	return service.atualizar(id, UsuarioConverter.toEntity(dto))
 				.map(UsuarioConverter::toDTO);
@@ -61,6 +66,7 @@ public class UsuarioResource {
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("ADMIN")
     public Uni<Void> excluir(@Valid @NotNull Long id) {
     	return service.excluir(id);
     }
