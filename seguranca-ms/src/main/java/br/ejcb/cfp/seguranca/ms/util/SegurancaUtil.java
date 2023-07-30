@@ -63,7 +63,6 @@ public class SegurancaUtil {
 		return chave;
 	}
 	
-	/*
 	public static void main(String a[]) {
 		SegurancaUtil util = new SegurancaUtil();
 		
@@ -104,6 +103,5 @@ public class SegurancaUtil {
 		System.out.println("senha = " + senha + "\n\n");
 
 	}
-	*/
 
 }

@@ -9,8 +9,9 @@ import static br.ejcb.cfp.seguranca.ms.constants.SegurancaConstants.MESSAGE_USUA
 import java.time.LocalDateTime;
 
 import br.ejcb.cfp.seguranca.ms.rest.dto.AutenticacaoDTO;
-import br.ejcb.cfp.seguranca.ms.rest.dto.UsuarioAutenticadoDTO;
+import br.ejcb.cfp.seguranca.ms.rest.dto.TokenUsuarioAutenticadoDTO;
 import br.ejcb.cfp.seguranca.ms.service.exceptions.SegurancaException;
+import br.ejcb.cfp.seguranca.ms.session.SessaoUsuario;
 import br.ejcb.cfp.seguranca.ms.util.ConfiguracaoUtil;
 import br.ejcb.cfp.seguranca.ms.util.SegurancaUtil;
 import io.smallrye.mutiny.Uni;
@@ -29,11 +30,14 @@ public class SegurancaService {
 	BloqueioService bloqueioService;
 
 	@Inject
+	private SessaoUsuario sessaoUsuario;
+	
+	@Inject
 	SegurancaUtil segurancaUtil;
 	@Inject
 	ConfiguracaoUtil configUtil;
 	
-	public Uni<UsuarioAutenticadoDTO> autenticar(@Valid AutenticacaoDTO dto) {
+	public Uni<TokenUsuarioAutenticadoDTO> autenticar(@Valid AutenticacaoDTO dto) {
 		return usuarioService.carregar(dto.getLogin())
 				.onItem().ifNull().failWith(() -> new SegurancaException(MESSAGE_LOGIN_SENHA_INVALIDO))
 				.onItem().ifNotNull().transformToUni(usuario -> {
@@ -68,12 +72,8 @@ public class SegurancaService {
 									
 									// do contrario, tudo ok
 									usuarioService.registrarAcessoComSucesso(usuario);
-									return Uni.createFrom().item(UsuarioAutenticadoDTO.create()
-											.withChave(usuario.getChave())
-											.withNome(usuario.getNome())
-											.withPerfil(usuario.getPerfil())
-											);
 									
+									return null; // TODO Uni.createFrom().item(sessaoUsuario.criarSessao(usuario));
 								});
 					});
 				});

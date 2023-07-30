@@ -1,6 +1,5 @@
 package br.ejcb.cfp.seguranca.ms.rest.dto;
 
-import br.ejcb.cfp.seguranca.ms.domain.enums.Perfil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,14 +13,14 @@ import lombok.With;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UsuarioAutenticadoDTO {
+public class TokenUsuarioAutenticadoDTO {
 	
-	private String chave;
-	private String nome;
-	private Perfil perfil;
+	private String tokenAcesso;
+	private String tokenDadosUsuario;
+	private String tokenCadastro;
 	
-	public static synchronized UsuarioAutenticadoDTO create() {
-		return new UsuarioAutenticadoDTO();
+	public static synchronized TokenUsuarioAutenticadoDTO create() {
+		return new TokenUsuarioAutenticadoDTO();
 	}
 
 }
