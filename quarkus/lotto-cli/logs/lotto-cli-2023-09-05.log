@@ -1,0 +1,12 @@
+17:26:24.032 [main] INFO  b.e.l.app.LottoCliApplicationTests - Starting LottoCliApplicationTests using Java 17.0.6 with PID 5308 (started by ernan in C:\projetos\controle-financeiro-pessoal\backend\lotto-cli)
+17:26:24.033 [main] INFO  b.e.l.app.LottoCliApplicationTests - No active profile set, falling back to 1 default profile: "default"
+17:26:24.342 [main] INFO  b.e.l.app.LottoCliApplicationTests - Started LottoCliApplicationTests in 0.58 seconds (process running for 1.245)
+Starting LottoCliApplicationTests using Java 17.0.6 with PID 4576 (started by ernan in C:\projetos\controle-financeiro-pessoal\backend\lotto-cli)
+No active profile set, falling back to 1 default profile: "default"
+Started LottoCliApplicationTests in 0.615 seconds (process running for 1.405)
+Starting LottoCliApplicationTests using Java 17.0.6 with PID 25068 (started by ernan in C:\projetos\controle-financeiro-pessoal\backend\lotto-cli)
+No active profile set, falling back to 1 default profile: "default"
+Started LottoCliApplicationTests in 0.677 seconds (process running for 1.427)
+Starting LottoCliApplicationTests using Java 17.0.6 with PID 16728 (started by ernan in C:\projetos\controle-financeiro-pessoal\backend\lotto-cli)
+No active profile set, falling back to 1 default profile: "default"
+Started LottoCliApplicationTests in 0.546 seconds (process running for 1.201)
