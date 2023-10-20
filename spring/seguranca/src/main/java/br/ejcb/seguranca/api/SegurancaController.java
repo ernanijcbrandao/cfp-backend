@@ -4,21 +4,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import br.ejcb.cfp.seguranca.ms.rest.dto.AutenticacaoDTO;
-import br.ejcb.cfp.seguranca.ms.rest.dto.TokenUsuarioAutenticadoDTO;
 import br.ejcb.cfp.seguranca.ms.service.SegurancaService;
+import br.ejcb.seguranca.dto.TokenUsuarioAutenticadoDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import reactor.core.publisher.Mono;
 
+@RestController
 @RequestMapping("/api/v1/seguranca")
-public class SegurancaResource {
+public class SegurancaController {
 
 	private SegurancaService service;
 
 	@Autowired
-	public SegurancaResource(SegurancaService service) {
+	public SegurancaController(SegurancaService service) {
 		this.service = service;
 	}
 
@@ -42,6 +44,5 @@ public class SegurancaResource {
     public Mono<TokenUsuarioAutenticadoDTO> autenticar(@Valid @NotNull final AutenticacaoDTO dto) {
     	return service.autenticar(dto);
     }
-
 
 }
