@@ -8,10 +8,10 @@ async function bootstrap() {
 
   // swagger
   const configSwagger = new DocumentBuilder()
-      .setTitle('Módulo Financeiro Node/NestJS')
-      .setDescription('API´s do Módulo Financeiro MS')
+      .setTitle('Módulo Segurança Node/NestJS')
+      .setDescription('API´s do Módulo Segurança MS')
       .setVersion('1.0')
-      .addTag('Módulo Financeiro')
+      .addTag('Módulo Segurança')
       .build();
 
   const document = SwaggerModule.createDocument(app, configSwagger);
@@ -21,7 +21,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   // start-ando servidor
-  await app.listen(20110);
+  await app.listen(20010);
 }
 
 bootstrap();

@@ -10,15 +10,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Account {
-  id             String @id
+model User {
+  id             String    @id
   name           String
-  description    String?
-  owner          String
-  created        DateTime @default(now())
+  email          String    @unique
+  login          String    @unique
+  publickey      String    @unique
+  profile        String
+  created        DateTime  @default(now())
   lastUpdate     DateTime?
-  openingBalance String
   active         Boolean
 
-  @@unique(fields: [owner, name], name: "nameAccountUniqueForOwner")
+}
+
+model Password {
+  id             Int        @default(autoincrement()) @id
+  user           String
+  password       String
+  reason         String
+  expire         DateTime?
+  created        DateTime   @default(now())
+  active         Boolean
+
+  @@unique(fields: [user, password], name: "passwordUserUnique")
+}
+
+model Blocks {
+  id             Int       @default(autoincrement()) @id
+  user           String
+  reason         String
+  blocked        DateTime  @default(now())
+  expire         DateTime
+  active         Boolean
+  
 }

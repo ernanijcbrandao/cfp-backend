@@ -1,15 +1,13 @@
 import { IsNotEmpty, IsNumber, IsOptional, Length, MaxLength } from "class-validator";
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class RequestCreateAccount {
+export class RequestUpdateUser {
  
-    @IsNotEmpty({
-        message: 'o atributo \'name\' deve ser informado.'
-    })
+    @IsOptional()
     @Length(5, 20, {
         message: 'O atributo \'name\' deve possuir no mínimo 5 e no máximo 20 caracateres.'
     })
-    @ApiProperty()
+    @ApiPropertyOptional()
     name: string;
 
     @ApiPropertyOptional()
@@ -19,16 +17,15 @@ export class RequestCreateAccount {
     })
     description?: string;
 
-    @IsNotEmpty({
-        message: 'O atributo \'owner\' deve ser informado.'
-    })
-    @ApiProperty()
+    @IsOptional()
+    @ApiPropertyOptional()
     owner: string;
 
+    @IsOptional()
     @IsNumber({}, {
         message: 'O atribtuo \'openingBalance\' deve ser informado e possuir um valor numérico válido'
     })
-    @ApiProperty()
+    @ApiPropertyOptional()
     openingBalance: number;
 
 }
