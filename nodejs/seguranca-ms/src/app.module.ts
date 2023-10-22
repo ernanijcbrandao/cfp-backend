@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { PrismaService } from './infra/database/prisma.service';
-import { AccountModule } from './core/account/account.module';
-import { AccountController } from './core/account/account.controller';
+import { UserModule } from './core/user/user.module';
+import { UserController } from './core/user/user.controller';
 import { DecimalUtilsService } from './util/decimal-utils-service';
-import { AccountService } from './core/account/account.service';
+import { UserService } from './core/user/user.service';
 
 @Module({
-  imports: [AccountModule],
-  controllers: [AccountController],
-  providers: [AccountService, PrismaService, DecimalUtilsService],
+  imports: [UserModule],
+  controllers: [UserController],
+  providers: [UserService, PrismaService, DecimalUtilsService],
 })
 export class AppModule {}
