@@ -1,34 +1,48 @@
-import { IsNotEmpty, IsNumber, IsOptional, Length, MaxLength } from "class-validator";
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  Length,
+  MaxLength,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { UserProfile } from './user-profile.enum';
 
 export class RequestCreateUser {
- 
-    @IsNotEmpty({
-        message: 'o atributo \'name\' deve ser informado.'
-    })
-    @Length(5, 20, {
-        message: 'O atributo \'name\' deve possuir no mínimo 5 e no máximo 20 caracateres.'
-    })
-    @ApiProperty()
-    name: string;
+  @IsNotEmpty({
+    message: "o atributo 'name' deve ser informado.",
+  })
+  @Length(5, 50, {
+    message:
+      "O atributo 'name' deve possuir no mínimo 5 e no máximo 50 caracateres.",
+  })
+  @ApiProperty()
+  name: string;
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @MaxLength(300, {
-        message: 'O atributo \'description\' deve possuir no máximo 300 caracateres.'
-    })
-    description?: string;
+  @IsNotEmpty({
+    message: "o atributo 'email' deve ser informado.",
+  })
+  @MaxLength(100, {
+    message: "O atributo 'email' deve possuir no máximo 100 caracateres.",
+  })
+  @IsEmail()
+  @ApiProperty()
+  email: string;
 
-    @IsNotEmpty({
-        message: 'O atributo \'owner\' deve ser informado.'
-    })
-    @ApiProperty()
-    owner: string;
+  @IsNotEmpty({
+    message: "o atributo 'login' deve ser informado.",
+  })
+  @Length(5, 30, {
+    message:
+      "O atributo 'login' deve possuir no mínimo 5 e no máximo 30 caracateres.",
+  })
+  @ApiProperty()
+  login: string;
 
-    @IsNumber({}, {
-        message: 'O atribtuo \'openingBalance\' deve ser informado e possuir um valor numérico válido'
-    })
-    @ApiProperty()
-    openingBalance: number;
-
+  @IsNotEmpty({
+    message: "o atributo 'profile' deve ser informado.",
+  })
+  @IsEnum(UserProfile)
+  @ApiProperty()
+  profile: UserProfile;
 }

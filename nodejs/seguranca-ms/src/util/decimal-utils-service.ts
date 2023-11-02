@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DecimalUtilsService {
-
   // Método para converter uma string em decimal
   convertStringToDecimal(decimalString: string): number {
     const decimalNumber = parseFloat(decimalString);
@@ -14,5 +13,4 @@ export class DecimalUtilsService {
     // Arredonda o valor para 2 casas decimais e o converte para uma string
     return value.toFixed(2);
   }
-
 }

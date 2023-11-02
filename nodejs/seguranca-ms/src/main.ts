@@ -8,11 +8,11 @@ async function bootstrap() {
 
   // swagger
   const configSwagger = new DocumentBuilder()
-      .setTitle('Módulo Segurança Node/NestJS')
-      .setDescription('API´s do Módulo Segurança MS')
-      .setVersion('1.0')
-      .addTag('Módulo Segurança')
-      .build();
+    .setTitle('Módulo Segurança Node/NestJS')
+    .setDescription('API´s do Módulo Segurança MS')
+    .setVersion('1.0')
+    .addTag('Módulo Segurança')
+    .build();
 
   const document = SwaggerModule.createDocument(app, configSwagger);
   SwaggerModule.setup('docs/api', app, document);

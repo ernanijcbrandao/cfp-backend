@@ -1,31 +1,23 @@
-import { IsNotEmpty, IsNumber, IsOptional, Length, MaxLength } from "class-validator";
+import { IsEmail, IsEnum, Length, MaxLength } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { UserProfile } from './user-profile.enum';
 
 export class RequestUpdateUser {
- 
-    @IsOptional()
-    @Length(5, 20, {
-        message: 'O atributo \'name\' deve possuir no mínimo 5 e no máximo 20 caracateres.'
-    })
-    @ApiPropertyOptional()
-    name: string;
+  @Length(5, 50, {
+    message:
+      "O atributo 'name' deve possuir no mínimo 5 e no máximo 50 caracateres.",
+  })
+  @ApiPropertyOptional()
+  name?: string;
 
-    @ApiPropertyOptional()
-    @IsOptional()
-    @MaxLength(300, {
-        message: 'O atributo \'description\' deve possuir no máximo 300 caracateres.'
-    })
-    description?: string;
+  @MaxLength(100, {
+    message: "O atributo 'email' deve possuir no máximo 100 caracateres.",
+  })
+  @IsEmail()
+  @ApiPropertyOptional()
+  email?: string;
 
-    @IsOptional()
-    @ApiPropertyOptional()
-    owner: string;
-
-    @IsOptional()
-    @IsNumber({}, {
-        message: 'O atribtuo \'openingBalance\' deve ser informado e possuir um valor numérico válido'
-    })
-    @ApiPropertyOptional()
-    openingBalance: number;
-
+  @IsEnum(UserProfile)
+  @ApiPropertyOptional()
+  profile?: UserProfile;
 }
