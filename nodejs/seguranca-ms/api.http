@@ -1,0 +1,29 @@
+POST http://localhost:20010/v1/users
+Content-Type: application/json
+
+{
+    "name": "usuario teste 03",
+    "email": "tst3@testando.com.br",
+    "login": "utst3",
+    "profile": "USER"
+}
+
+###
+GET http://localhost:20010/v1/users/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba
+
+###
+GET http://localhost:20010/v1/users?name=02
+###
+
+PUT http://localhost:20010/v1/users/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba
+Content-Type: application/json
+
+{
+    "name": "usuario teste 003",
+    "profile": "ADMIN"
+}
+
+###
+
+PATCH http://localhost:20010/v1/users/inactive/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba
+Content-Type: application/json

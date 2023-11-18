@@ -8,6 +8,8 @@ import {
   Query,
   Res,
   Patch,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RequestCreateUser } from './dto/request-create-user';
@@ -25,34 +27,60 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'Dados do usuário' })
   @ApiResponse({ status: 404, description: 'ID inválido' })
   async loadById(@Param('id') id: string) {
-    const user = await this.userService.load(id);
+    const data = await this.userService.findById(id);
+    if (!data) {
+      throw new NotFoundException('ID inválido');
+    }
+    const {name, email, login, profile, created, lastUpdate, active } = data;
     return {
-      user,
+      id,
+      name,
+      email,
+      login,
+      profile,
+      created, 
+      lastUpdate, 
+      active
     };
   }
 
   @Get()
   @ApiOperation({
-    summary: 'Listar dados de usuários ativos com opção de filtro por nome',
+    summary: 'Listar dados de usuários com opção de filtro por nome',
   })
   @ApiResponse({ status: 200, description: 'Lista de usuários' })
   @ApiResponse({ status: 204, description: 'Nenhum usuário encontrado' })
-  async list(@Res() response: Response, @Query('name') name?: string) {
-    const users = await this.userService.list(name);
-    const statusCode = users.length > 0 ? 200 : 204;
-    return response.status(statusCode).json({
-      users,
-    });
+  async list(@Res() response: Response, @Query('name') _name?: string) {
+    const resultList = await this.userService.list(_name);
+    const statusCode = resultList.length > 0 ? 200 : 204;
+
+    return response.status(statusCode).json(resultList.map( (item) => { 
+      return {
+        id: item.id, 
+        name: item.name, 
+        email: item.email, 
+        login: item.login, 
+        profile: item.profile, 
+        created: item.created, 
+        lastUpdate: item.lastUpdate, 
+        active: item.active
+      };
+    }));
   }
 
   @Post()
   @ApiOperation({ summary: 'Criar um usuário' })
-  @ApiResponse({ status: 201, description: 'Usuário criad0' })
+  @ApiResponse({ status: 201, description: 'Usuário criado' })
   @ApiResponse({ status: 400, description: 'Parâmetro(s) inválido(s)' })
   async create(@Body() body: RequestCreateUser) {
-    const user = await this.userService.create(body);
+    const {id, name, email, login, profile, created, active } =  await this.userService.create(body);
     return {
-      user,
+      id,
+      name, 
+      email, 
+      login, 
+      profile, 
+      created
     };
   }
 
@@ -70,7 +98,7 @@ export class UserController {
     };
   }
 
-  @Patch('/inactive:id')
+  @Patch('/inactive/:id')
   @ApiOperation({ summary: 'Inativar um determinado usuário' })
   @ApiResponse({ status: 204, description: 'Usuário inativado' })
   @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
@@ -78,4 +106,5 @@ export class UserController {
   async inactive(@Param('id') id: string) {
     await this.userService.inactive(id);
   }
+  
 }

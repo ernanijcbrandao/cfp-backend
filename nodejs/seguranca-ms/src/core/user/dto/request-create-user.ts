@@ -39,10 +39,9 @@ export class RequestCreateUser {
   @ApiProperty()
   login: string;
 
-  @IsNotEmpty({
-    message: "o atributo 'profile' deve ser informado.",
+  @IsEnum(UserProfile, {
+    message: "O atributo 'profile' deve ser informado com um dos seguintes valores [" + Object.values(UserProfile) + "]",
   })
-  @IsEnum(UserProfile)
   @ApiProperty()
   profile: UserProfile;
 }

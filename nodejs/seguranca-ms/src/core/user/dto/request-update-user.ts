@@ -10,14 +10,10 @@ export class RequestUpdateUser {
   @ApiPropertyOptional()
   name?: string;
 
-  @MaxLength(100, {
-    message: "O atributo 'email' deve possuir no máximo 100 caracateres.",
+  @IsEnum(UserProfile, {
+    message: "O atributo 'profile' deve ser informado com um dos seguintes valores [" + Object.values(UserProfile) + "]",
   })
-  @IsEmail()
-  @ApiPropertyOptional()
-  email?: string;
-
-  @IsEnum(UserProfile)
   @ApiPropertyOptional()
   profile?: UserProfile;
+
 }

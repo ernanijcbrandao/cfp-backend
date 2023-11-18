@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as moment from 'moment-timezone';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,6 +20,9 @@ async function bootstrap() {
 
   // validation
   app.useGlobalPipes(new ValidationPipe());
+
+  // Configurar o fuso horário para Brasília (UTC-3)
+  moment.tz.setDefault('America/Sao_Paulo');
 
   // start-ando servidor
   await app.listen(20010);

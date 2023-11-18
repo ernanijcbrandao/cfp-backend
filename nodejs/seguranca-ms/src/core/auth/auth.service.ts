@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nest/JwtService';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +12,7 @@ export class AuthService {
     const user = this.validateCredentials(username, password);
 
     const payload = {
-      username: user.login,
+      teste: 0 // username: user.login,
     };
 
     // montar o jwt a ser retornado
