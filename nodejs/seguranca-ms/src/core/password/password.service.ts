@@ -1,9 +1,12 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { ForbiddenException, BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { env } from 'process';
 import { RequestCreatePassword } from './dto/request-create-password';
 import { PrismaService } from 'src/infra/database/prisma.service';
-import { addDays } from 'date-fns';
+import { addDays, isAfter, isBefore } from 'date-fns';
+import { RequestValidatePassword } from './dto/request-validate-password';
+import { Password } from '@prisma/client';
+import { RequestChangePassword } from './dto/request-change-password';
 
 @Injectable()
 export class PasswordService {
@@ -11,7 +14,12 @@ export class PasswordService {
     constructor(
         private prisma: PrismaService
     ) {}
-      
+
+    /**
+     * criptografar senha usando BCrypt
+     * @param password 
+     * @returns 
+     */
     private hashPassword(password: string): Promise<string> {
         const saltRounds = 10;
         const salt = bcrypt.genSalt(saltRounds);
@@ -19,7 +27,7 @@ export class PasswordService {
         return hashedPassword;
     }
 
-    private comparePasswords(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
+    private async comparePasswords(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
         return bcrypt.compare(plainTextPassword, hashedPassword);
     }
 
@@ -29,7 +37,6 @@ export class PasswordService {
      */
     private validateRequestCreate(request: RequestCreatePassword) {
         const requestCompleted = request
-            && request.profile
             && request.userId
             && request.password;
 
@@ -43,9 +50,9 @@ export class PasswordService {
      * uma letra minuscula, um digito e caracteres especiais
      * @param request 
      */
-    private validatePassword(request: RequestCreatePassword) {
+    private validateMinimumRequirementsForPassword(password: string) {
         const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
-        const valid = regex.test(request.password);
+        const valid = regex.test(password);
 
         if (!valid) {
             throw new BadRequestException('A senha informada não possui os requisitos mínimos: possuir no mínimo 8 caracteres, letra maiúscula, minúscula, dígito e caracter(s) especial(is).');
@@ -133,9 +140,70 @@ export class PasswordService {
         });
     }
 
+    /**
+     * buscar a lista de historico de senhas na tabela ordenando pelo id de forma descendente,
+     * assim retornando os registros dos mais novos para os mais antigos
+     * conforme parametro historico (numero de senhas armazenadas), retornar o id do primeiro 
+     * registro fora do limite informado
+     * @param request 
+     * @param historic 
+     * @returns 
+     */
+    private async getIdFirstHistoryPasswordForDelete(request: RequestCreatePassword, history: number) {
+        const list = await this.prisma.password.findMany({
+            where: {
+              userId: request.userId,
+              active: false,
+            },
+            orderBy: {
+                id: 'desc',
+            }
+        });
+        let result = -1;
+        if ((list) && (list.length > history)) {
+            result = list[history].id;
+        }
+        return result;
+    }
+
+    /**
+     * apagar todos os registros de historico de senha que excederem o limite parametrizado 
+     * de armazenagem de senhas. Para isso sera informado o id do primeiro registro, em ordem
+     * decrescente, do qual sera o ponto de partida para a exclusao
+     * @param request 
+     * @param startId 
+     */
+    private async deleteExceededHistory(request: RequestCreatePassword, startId: number) {
+        await this.prisma.password.deleteMany({
+            where: {
+              userId: request.userId,
+              active: false,
+              id: {
+                lte: startId
+              }
+            },
+        });
+    }
+
+    /**
+     * manter o historico de senhas conforme parametrizacao
+     * @param request 
+     * @returns 
+     */
     private async keepOnlyLastPasswordsasParameterized(request: RequestCreatePassword) {
-        const numberDaysExpirePassword = parseInt(process.env.NO_REPEAT_PASSWORD, 10) || -1;
         const countPasswords = await this.countPasswordsRegistered(request);
+        if (countPasswords == 0) {
+            return;
+        }
+
+        let keepHistoryPassword = parseInt(process.env.NO_REPEAT_PASSWORD, 10) || 0;
+        keepHistoryPassword = keepHistoryPassword < 1 ? 0 : keepHistoryPassword;
+        if (countPasswords <= keepHistoryPassword) {
+            return;
+        }
+
+        const startId = await this.getIdFirstHistoryPasswordForDelete(request, keepHistoryPassword);
+        await this.deleteExceededHistory(request, startId);
     }
     
     /**
@@ -145,11 +213,133 @@ export class PasswordService {
      */
     async createPassword(request: RequestCreatePassword) {
         this.validateRequestCreate(request);
-        this.validatePassword(request);
+        this.validateMinimumRequirementsForPassword(request.password);
         await this.checkIfPasswordHasAlreadyRegisteredInTheLatestUpdates(request);
         // TODO a seguir, implementar aqui o controle transacional, que com prisma eh feito manualmente
         await this.disableCurrentPassword(request);
         await this.addNewPassword(request);
+    }
+
+    /**
+     *  verificar se todos os parametros foram informados
+     * @param request 
+     */
+    private validateRequestValidatePassword(request: RequestValidatePassword) {
+        const requestCompleted = request
+            && request.userId
+            && request.password;
+
+        if (!requestCompleted) {
+            throw new BadRequestException('Requisição para validação de senha é insuficiente!');
+        }
+    }
+
+    private async registerInvalidAccessDueToInvalidPassword(password: Password) {
+        const register = await this.prisma.password.update({
+            where: {
+                id: password.id
+            },
+            data: {
+                invalidAttempt: password.invalidAttempt+1,
+            },
+        });
+        
+        const limitUnsuccessful = parseInt(process.env.LIMIT_UNSUCCESSFUL_ACCESS_ATTEMPTS, 10) || -1;
+        if ( (limitUnsuccessful > 0) && (register.invalidAttempt >= limitUnsuccessful)) {
+            // TODO chamar servico que devera criar um bloqueio - temporario - por limite excedido de tentativa de acesso invalido
+        }
+    }
+
+    /**
+     * recuperar a senha ativa (unica) para o usuario em questao
+     * @param request 
+     * @returns 
+     */
+    private async getPasswordActive(request: RequestValidatePassword | RequestChangePassword ): Promise<Password> {
+        const password = await this.prisma.password.findFirst({
+            where: {
+              userId: request.userId,              
+              active: true,
+            },
+        });
+        if (!password) {
+            throw new ForbiddenException('Usuário inválido!');
+        }
+        if (!this.comparePasswords(request.password, password.password)) {
+            this.registerInvalidAccessDueToInvalidPassword(password);
+            throw new UnauthorizedException('Senha inválida!');
+        }
+        return password;
+    }
+
+    /**
+     * verificar se senha esta expirada. 
+     * em caso positivo lancar excecao 
+     * @param password 
+     * @returns 
+     */
+    private async checkExpiredPassword(password: Password) {
+        if ((!password.expire) || isAfter(password.expire, new Date())) {
+            return;
+        }
+        throw new UnauthorizedException('Senha expirada!');
+    }
+
+    private async registerValidAccess(password: Password) {
+        await this.prisma.password.update({
+            where: {
+                id: password.id
+            },
+            data: {
+                invalidAttempt: 0,
+            },
+        });
+    }
+
+    /**
+     * validar senha de um detemrinado usuario
+     * caso a senha seja invalida um Forbidden sera lancado
+     * caso esta senha esteja expirada um Unauthorized sera lancado
+     * @param request 
+     */
+    async validatePassword(request: RequestValidatePassword) {
+        this.validateRequestValidatePassword(request);
+        const password = await this.getPasswordActive(request);
+        this.checkExpiredPassword(password);
+        this.registerValidAccess(password);
+    }
+
+    /**
+     *  verificar se todos os parametros foram informados
+     * @param request 
+     */
+    private validateRequestChangePassword(request: RequestChangePassword) {
+        const requestCompleted = request
+            && request.userId
+            && request.password
+            && request.newpassword;
+
+        if (!requestCompleted) {
+            throw new BadRequestException('Requisição para alteração de senha é insuficiente!');
+        }
+    }
+
+    /**
+     * altera a senha atual de um detemrinado usuario
+     * valida se a senha atual informada eh valida
+     * valida se nova senha possui requisitos minimos aceitaveis
+     * cria a nova senha
+     * inativa a senha anterior, mantendo o controle historico conforme parametrizado
+     * @param request 
+     */
+    async changePassword(request: RequestChangePassword) {
+        this.validateRequestChangePassword(request);
+        this.getPasswordActive(request);
+        const requestNewPassword = {
+            userId: request.userId,
+            password: request.newpassword
+        }
+        this.createPassword(requestNewPassword);
     }
 
 }
