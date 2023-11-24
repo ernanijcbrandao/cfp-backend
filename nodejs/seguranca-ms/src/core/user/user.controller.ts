@@ -98,7 +98,16 @@ export class UserController {
     };
   }
 
-  @Patch('/inactive/:id')
+  @Patch('/activate/:id')
+  @ApiOperation({ summary: 'Reativar um determinado usuário' })
+  @ApiResponse({ status: 204, description: 'Usuário reativado' })
+  @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
+  @ApiResponse({ status: 409, description: 'Requisição negada' })
+  async active(@Param('id') id: string) {
+    await this.userService.active(id);
+  }
+  
+  @Patch('/inactivate/:id')
   @ApiOperation({ summary: 'Inativar um determinado usuário' })
   @ApiResponse({ status: 204, description: 'Usuário inativado' })
   @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })

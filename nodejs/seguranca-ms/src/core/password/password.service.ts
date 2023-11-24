@@ -1,18 +1,22 @@
-import { ForbiddenException, BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, BadRequestException, ConflictException, Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { env } from 'process';
 import { RequestCreatePassword } from './dto/request-create-password';
 import { PrismaService } from 'src/infra/database/prisma.service';
-import { addDays, isAfter, isBefore } from 'date-fns';
+import { addDays, addMinutes, isAfter, isBefore } from 'date-fns';
 import { RequestValidatePassword } from './dto/request-validate-password';
 import { Password } from '@prisma/client';
 import { RequestChangePassword } from './dto/request-change-password';
+import { BlockService } from '../block/block.service';
+import { BlockReason } from '../block/dto/block-reason.enum';
+import { RequestCreateTemporaryBlock } from '../block/dto/request-create-temporary-block';
 
 @Injectable()
 export class PasswordService {
 
     constructor(
-        private prisma: PrismaService
+        private prisma: PrismaService,
+        private blocksService: BlockService
     ) {}
 
     /**
@@ -242,12 +246,20 @@ export class PasswordService {
             data: {
                 invalidAttempt: password.invalidAttempt+1,
             },
+        }).then(register => {
+            const limitUnsuccessful = parseInt(process.env.LIMIT_UNSUCCESSFUL_ACCESS_ATTEMPTS, 10) || -1;
+            const blockingExpirationTime = parseInt(process.env.PASSWORD_LOCK_EXPIRATION_TIME, 10) || 10;
+
+            if ( (limitUnsuccessful > 0) && (register.invalidAttempt >= limitUnsuccessful)) {
+                const requestBlock = new RequestCreateTemporaryBlock(password.userId,
+                    BlockReason.TEMPORARY_BLOCKING_EXCEEDING_INCORRECT_PASSWORD_LIMIT,
+                    addMinutes(new Date(), blockingExpirationTime)
+                    );
+                this.blocksService.createTemporaryBlocking(requestBlock);
+            }
+        }).catch(error => {
+            throw new InternalServerErrorException();
         });
-        
-        const limitUnsuccessful = parseInt(process.env.LIMIT_UNSUCCESSFUL_ACCESS_ATTEMPTS, 10) || -1;
-        if ( (limitUnsuccessful > 0) && (register.invalidAttempt >= limitUnsuccessful)) {
-            // TODO chamar servico que devera criar um bloqueio - temporario - por limite excedido de tentativa de acesso invalido
-        }
     }
 
     /**
@@ -255,21 +267,27 @@ export class PasswordService {
      * @param request 
      * @returns 
      */
-    private async getPasswordActive(request: RequestValidatePassword | RequestChangePassword ): Promise<Password> {
-        const password = await this.prisma.password.findFirst({
+    private getPasswordActive(request: RequestValidatePassword | RequestChangePassword ): Password {
+        this.prisma.password.findFirst({
             where: {
               userId: request.userId,              
               active: true,
             },
+        }).then(password => {
+            if (!password) {
+                throw new UnauthorizedException('Usuário inválido!');
+            }
+            this.comparePasswords(request.password, password.password).then(valid => {
+                if (!valid) {
+                    this.registerInvalidAccessDueToInvalidPassword(password);
+                    throw new UnauthorizedException('Senha inválida!');
+                }
+            });
+            return password;
+        }).catch(error => {
+            throw new InternalServerErrorException();
         });
-        if (!password) {
-            throw new ForbiddenException('Usuário inválido!');
-        }
-        if (!this.comparePasswords(request.password, password.password)) {
-            this.registerInvalidAccessDueToInvalidPassword(password);
-            throw new UnauthorizedException('Senha inválida!');
-        }
-        return password;
+        return null;
     }
 
     /**
@@ -304,7 +322,7 @@ export class PasswordService {
      */
     async validatePassword(request: RequestValidatePassword) {
         this.validateRequestValidatePassword(request);
-        const password = await this.getPasswordActive(request);
+        const password = this.getPasswordActive(request);
         this.checkExpiredPassword(password);
         this.registerValidAccess(password);
     }

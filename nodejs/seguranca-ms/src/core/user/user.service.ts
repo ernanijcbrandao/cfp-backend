@@ -99,6 +99,32 @@ export class UserService {
     });
   }
 
+  async active(id: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`ID inválido.`);
+    }
+
+    if (user.active) {
+      throw new NotAcceptableException('Usuário já está ativo');
+    }
+
+    return await this.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        active: true,
+        lastUpdate: new Date(),
+      },
+    });
+  }
+
   async inactive(id: string) {
     const user = await this.prisma.user.findUnique({
       where: {

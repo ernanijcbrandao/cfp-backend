@@ -39,6 +39,7 @@ model Blocks {
   id             Int       @default(autoincrement()) @id
   userId         String
   reason         String
+  description    String?
   blocked        DateTime  @default(now())
   expire         DateTime?
   active         Boolean
