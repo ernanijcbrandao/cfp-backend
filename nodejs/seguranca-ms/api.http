@@ -2,17 +2,18 @@ POST http://localhost:20010/v1/users
 Content-Type: application/json
 
 {
-    "name": "usuario teste 03",
-    "email": "tst3@testando.com.br",
-    "login": "utst3",
-    "profile": "USER"
+    "name": "usuario teste 004",
+    "email": "tst4@testando.com.br",
+    "login": "utst4",
+    "profile": "ADMIN"
 }
 
 ###
-GET http://localhost:20010/v1/users/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba
+GET http://localhost:20010/v1/users/7ff9328f-8a60-4ec9-9c37-137328bfc68b
 
 ###
-GET http://localhost:20010/v1/users?name=02
+GET http://localhost:20010/v1/users
+
 ###
 
 PUT http://localhost:20010/v1/users/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba

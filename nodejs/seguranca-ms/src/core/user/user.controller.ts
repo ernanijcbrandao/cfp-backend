@@ -16,6 +16,7 @@ import { RequestCreateUser } from './dto/request-create-user';
 import { RequestUpdateUser } from './dto/request-update-user';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { RequestChangePassword } from '../password/dto/request-change-password';
 
 @ApiTags('users')
 @Controller('v1/users')
@@ -50,8 +51,13 @@ export class UserController {
   })
   @ApiResponse({ status: 200, description: 'Lista de usuários' })
   @ApiResponse({ status: 204, description: 'Nenhum usuário encontrado' })
-  async list(@Res() response: Response, @Query('name') _name?: string) {
-    const resultList = await this.userService.list(_name);
+  async list(@Res() response: Response, 
+      @Query('name') _name?: string,
+      @Query('active') _active?: string) {
+
+    const resultList = await this.userService.list(_name, 
+      ((_active) ? 'true' === _active : undefined));
+
     const statusCode = resultList.length > 0 ? 200 : 204;
 
     return response.status(statusCode).json(resultList.map( (item) => { 
@@ -100,7 +106,7 @@ export class UserController {
 
   @Patch('/activate/:id')
   @ApiOperation({ summary: 'Reativar um determinado usuário' })
-  @ApiResponse({ status: 204, description: 'Usuário reativado' })
+  @ApiResponse({ status: 200, description: 'Usuário reativado' })
   @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
   @ApiResponse({ status: 409, description: 'Requisição negada' })
   async active(@Param('id') id: string) {
@@ -109,11 +115,26 @@ export class UserController {
   
   @Patch('/inactivate/:id')
   @ApiOperation({ summary: 'Inativar um determinado usuário' })
-  @ApiResponse({ status: 204, description: 'Usuário inativado' })
+  @ApiResponse({ status: 200, description: 'Usuário inativado' })
   @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
   @ApiResponse({ status: 409, description: 'Requisição negada' })
   async inactive(@Param('id') id: string) {
     await this.userService.inactive(id);
   }
+
+
+  @Put('/changePassword/:id')
+  @ApiOperation({ summary: 'Permitir a alteração de senha do usuário' })
+  @ApiResponse({ status: 204, description: 'Senha do usuário alterada com sucesso' })
+  @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
+  @ApiResponse({ status: 409, description: 'Requisição negada' })
+  async changePassword(@Res() response: Response, 
+      @Param('id') userId: string,
+      @Body() body: RequestChangePassword) {
+    await this.userService.changePassword(userId, body);
+
+    return response.status(204);
+  }
   
+
 }

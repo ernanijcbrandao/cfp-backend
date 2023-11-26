@@ -10,6 +10,8 @@ import { RequestCreateUser } from './dto/request-create-user';
 import { randomUUID } from 'crypto';
 import { RequestUpdateUser } from './dto/request-update-user';
 import { UserProfile } from './dto/user-profile.enum';
+import { RequestChangePassword } from '../password/dto/request-change-password';
+import { UserPasswordChangeRequest } from './dto/user-password-change-request';
 
 @Injectable()
 export class UserService {
@@ -151,12 +153,11 @@ export class UserService {
     });
   }
 
-  async list(name?: string, profile?: UserProfile): Promise<User[]> {
+  async list(name?: string, active?: boolean): Promise<User[]> {
     return await this.prisma.user.findMany({
       where: {
         name: name ? { contains: name } : undefined,
-        profile: profile ? profile : undefined,
-        active: true,
+        active: active,
       },
     });
   }
@@ -173,6 +174,35 @@ export class UserService {
     if (user) {
       throw new BadRequestException('Login já existente');      
     }
+  }
+
+  async changePassword(userId: string, request: UserPasswordChangeRequest) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`ID inválido.`);
+    }
+
+    if (!user.active) {
+      throw new NotAcceptableException('Usuário inativo');
+    }
+
+    const { name: nameRequest, profile: profileRequest } = request;
+
+    return await this.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        name: !nameRequest ? user.name : nameRequest,
+        profile: !profileRequest ? user.profile : profileRequest,
+        lastUpdate: new Date(),
+      },
+    });
   }
 
 }
