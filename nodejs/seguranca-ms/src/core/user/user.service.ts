@@ -72,12 +72,8 @@ export class UserService {
     });
   }
 
-  async update(id: string, request: UpdateUserRequest) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
+  private async loadAndValidateActivity(userId: string): Promise<User> {
+    const user = await this.findById(userId);
 
     if (!user) {
       throw new NotFoundException(`ID inválido.`);
@@ -86,6 +82,12 @@ export class UserService {
     if (!user.active) {
       throw new NotAcceptableException('Usuário inativo');
     }
+
+    return user;
+  }
+
+  async update(id: string, request: UpdateUserRequest) {
+    const user = await this.loadAndValidateActivity(id);
 
     const { name: nameRequest, profile: profileRequest } = request;
 
@@ -102,11 +104,7 @@ export class UserService {
   }
 
   async active(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
+    const user = await this.findById(id);
 
     if (!user) {
       throw new NotFoundException(`ID inválido.`);
@@ -128,11 +126,7 @@ export class UserService {
   }
 
   async inactive(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
+    const user = await this.findById(id);
 
     if (!user) {
       throw new NotFoundException(`ID inválido.`);
@@ -177,19 +171,7 @@ export class UserService {
   }
 
   async changePassword(userId: string, request: UserPasswordChangeRequest) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`ID inválido.`);
-    }
-
-    if (!user.active) {
-      throw new NotAcceptableException('Usuário inativo');
-    }
+    const user = this.loadAndValidateActivity(userId);
 
     // return await this.prisma.user.update({
     //   where: {

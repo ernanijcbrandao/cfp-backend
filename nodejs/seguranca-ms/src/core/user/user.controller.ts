@@ -132,7 +132,6 @@ export class UserController {
       @Param('id') userId: string,
       @Body() body: ChangePasswordRequest) {
     await this.userService.changePassword(userId, body);
-
     return response.status(204);
   }
   
