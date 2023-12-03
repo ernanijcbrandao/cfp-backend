@@ -1,4 +1,4 @@
-export class RequestValidatePassword {
+export class ValidatePasswordRequest {
 
     constructor(userId: string, password: string) {
         this.userId = userId;

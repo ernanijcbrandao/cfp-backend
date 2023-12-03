@@ -1,15 +1,15 @@
 import { ForbiddenException, BadRequestException, ConflictException, Injectable, UnauthorizedException, InternalServerErrorException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { env } from 'process';
-import { RequestCreatePassword } from './dto/request-create-password';
+import { CreatePasswordRequest } from './dto/create-password-request';
 import { PrismaService } from 'src/infra/database/prisma.service';
 import { addDays, addMinutes, isAfter, isBefore } from 'date-fns';
-import { RequestValidatePassword } from './dto/request-validate-password';
+import { ValidatePasswordRequest } from './dto/validate-password-request';
 import { Password } from '@prisma/client';
-import { RequestChangePassword } from './dto/request-change-password';
+import { ChangePasswordRequest } from './dto/change-password-request';
 import { BlockService } from '../block/block.service';
 import { BlockReason } from '../block/dto/block-reason.enum';
-import { RequestCreateTemporaryBlock } from '../block/dto/request-create-temporary-block';
+import { CreateTemporaryBlockRequest } from '../block/dto/create-temporary-block-request';
 
 @Injectable()
 export class PasswordService {
@@ -39,7 +39,7 @@ export class PasswordService {
      *  verificar se todos os parametros foram informados
      * @param request 
      */
-    private validateRequestCreate(request: RequestCreatePassword) {
+    private validateRequestCreate(request: CreatePasswordRequest) {
         const requestCompleted = request
             && request.userId
             && request.password;
@@ -68,7 +68,7 @@ export class PasswordService {
      * @param userId
      * @returns 
      */
-    private async countPasswordsRegistered(request: RequestCreatePassword) {
+    private async countPasswordsRegistered(request: CreatePasswordRequest) {
         return this.prisma.password.count({
             where: {
                 userId: request.userId,
@@ -81,7 +81,7 @@ export class PasswordService {
      * verificar se nova senha informada esta dentre as ultimas cadastradas
      * @param request 
      */
-    private async checkIfPasswordHasAlreadyRegisteredInTheLatestUpdates(request: RequestCreatePassword) {
+    private async checkIfPasswordHasAlreadyRegisteredInTheLatestUpdates(request: CreatePasswordRequest) {
         const count = await this.prisma.password.count({
             where: {
                 userId: request.userId,
@@ -100,7 +100,7 @@ export class PasswordService {
      * usuario corrente
      * @param request 
      */
-    private async disableCurrentPassword(request: RequestCreatePassword) {
+    private async disableCurrentPassword(request: CreatePasswordRequest) {
         await this.prisma.password.updateMany({
             where: {
                 userId: request.userId,
@@ -132,7 +132,7 @@ export class PasswordService {
      * @param request
      * @returns 
      */
-    private async addNewPassword(request: RequestCreatePassword) {
+    private async addNewPassword(request: CreatePasswordRequest) {
         return await this.prisma.password.create({
           data: {
             userId: request.userId,
@@ -153,7 +153,7 @@ export class PasswordService {
      * @param historic 
      * @returns 
      */
-    private async getIdFirstHistoryPasswordForDelete(request: RequestCreatePassword, history: number) {
+    private async getIdFirstHistoryPasswordForDelete(request: CreatePasswordRequest, history: number) {
         const list = await this.prisma.password.findMany({
             where: {
               userId: request.userId,
@@ -177,7 +177,7 @@ export class PasswordService {
      * @param request 
      * @param startId 
      */
-    private async deleteExceededHistory(request: RequestCreatePassword, startId: number) {
+    private async deleteExceededHistory(request: CreatePasswordRequest, startId: number) {
         await this.prisma.password.deleteMany({
             where: {
               userId: request.userId,
@@ -194,7 +194,7 @@ export class PasswordService {
      * @param request 
      * @returns 
      */
-    private async keepOnlyLastPasswordsasParameterized(request: RequestCreatePassword) {
+    private async keepOnlyLastPasswordsasParameterized(request: CreatePasswordRequest) {
         const countPasswords = await this.countPasswordsRegistered(request);
         if (countPasswords == 0) {
             return;
@@ -215,7 +215,7 @@ export class PasswordService {
      * e apenas uma ativa para o usuario em questao
      * @param request
      */
-    async createPassword(request: RequestCreatePassword) {
+    async createPassword(request: CreatePasswordRequest) {
         this.validateRequestCreate(request);
         this.validateMinimumRequirementsForPassword(request.password);
         await this.checkIfPasswordHasAlreadyRegisteredInTheLatestUpdates(request);
@@ -228,7 +228,7 @@ export class PasswordService {
      *  verificar se todos os parametros foram informados
      * @param request 
      */
-    private validateRequestValidatePassword(request: RequestValidatePassword) {
+    private validateValidatePasswordRequest(request: ValidatePasswordRequest) {
         const requestCompleted = request
             && request.userId
             && request.password;
@@ -251,7 +251,7 @@ export class PasswordService {
             const blockingExpirationTime = parseInt(process.env.PASSWORD_LOCK_EXPIRATION_TIME, 10) || 10;
 
             if ( (limitUnsuccessful > 0) && (register.invalidAttempt >= limitUnsuccessful)) {
-                const requestBlock = new RequestCreateTemporaryBlock(password.userId,
+                const requestBlock = new CreateTemporaryBlockRequest(password.userId,
                     BlockReason.TEMPORARY_BLOCKING_EXCEEDING_INCORRECT_PASSWORD_LIMIT,
                     addMinutes(new Date(), blockingExpirationTime)
                     );
@@ -267,7 +267,7 @@ export class PasswordService {
      * @param request 
      * @returns 
      */
-    private getPasswordActive(request: RequestValidatePassword | RequestChangePassword ): Password {
+    private getPasswordActive(request: ValidatePasswordRequest | ChangePasswordRequest ): Password {
         this.prisma.password.findFirst({
             where: {
               userId: request.userId,              
@@ -320,8 +320,8 @@ export class PasswordService {
      * caso esta senha esteja expirada um Unauthorized sera lancado
      * @param request 
      */
-    async validatePassword(request: RequestValidatePassword) {
-        this.validateRequestValidatePassword(request);
+    async validatePassword(request: ValidatePasswordRequest) {
+        this.validateValidatePasswordRequest(request);
         const password = this.getPasswordActive(request);
         this.checkExpiredPassword(password);
         this.registerValidAccess(password);
@@ -331,7 +331,7 @@ export class PasswordService {
      *  verificar se todos os parametros foram informados
      * @param request 
      */
-    private validateRequestChangePassword(request: RequestChangePassword) {
+    private validateChangePasswordRequest(request: ChangePasswordRequest) {
         const requestCompleted = request
             && request.userId
             && request.password
@@ -350,8 +350,8 @@ export class PasswordService {
      * inativa a senha anterior, mantendo o controle historico conforme parametrizado
      * @param request 
      */
-    async changePassword(request: RequestChangePassword) {
-        this.validateRequestChangePassword(request);
+    async changePassword(request: ChangePasswordRequest) {
+        this.validateChangePasswordRequest(request);
         this.getPasswordActive(request);
         const requestNewPassword = {
             userId: request.userId,

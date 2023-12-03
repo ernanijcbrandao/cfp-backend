@@ -1,4 +1,4 @@
-export class RequestLogin {
+export default class LoginRequest {
 
     constructor (login: string, password: string) {
         this.login = login;

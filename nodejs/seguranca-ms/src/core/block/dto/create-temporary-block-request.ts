@@ -1,6 +1,6 @@
 import { BlockReason } from "./block-reason.enum";
 
-export class RequestCreateTemporaryBlock {
+export class CreateTemporaryBlockRequest {
 
     constructor (userId: string,
         reason: BlockReason,

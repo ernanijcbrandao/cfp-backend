@@ -12,11 +12,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { RequestCreateUser } from './dto/request-create-user';
-import { RequestUpdateUser } from './dto/request-update-user';
+import { CreateUserRequest } from './dto/create-user-request';
+import { UpdateUserRequest } from './dto/update-user-request';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { RequestChangePassword } from '../password/dto/request-change-password';
+import { ChangePasswordRequest } from '../password/dto/change-password-request';
 
 @ApiTags('users')
 @Controller('v1/users')
@@ -78,7 +78,7 @@ export class UserController {
   @ApiOperation({ summary: 'Criar um usuário' })
   @ApiResponse({ status: 201, description: 'Usuário criado' })
   @ApiResponse({ status: 400, description: 'Parâmetro(s) inválido(s)' })
-  async create(@Body() body: RequestCreateUser) {
+  async create(@Body() body: CreateUserRequest) {
     const {id, name, email, login, profile, created, active } =  await this.userService.create(body);
     return {
       id,
@@ -97,7 +97,7 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
   @ApiResponse({ status: 406, description: 'Usuário informado está inativo' })
   @ApiResponse({ status: 409, description: 'Requisição negada' })
-  async update(@Param('id') id: string, @Body() body: RequestUpdateUser) {
+  async update(@Param('id') id: string, @Body() body: UpdateUserRequest) {
     const user = await this.userService.update(id, body);
     return {
       user,
@@ -130,7 +130,7 @@ export class UserController {
   @ApiResponse({ status: 409, description: 'Requisição negada' })
   async changePassword(@Res() response: Response, 
       @Param('id') userId: string,
-      @Body() body: RequestChangePassword) {
+      @Body() body: ChangePasswordRequest) {
     await this.userService.changePassword(userId, body);
 
     return response.status(204);

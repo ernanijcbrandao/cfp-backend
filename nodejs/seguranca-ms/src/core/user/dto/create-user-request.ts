@@ -8,7 +8,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { UserProfile } from './user-profile.enum';
 
-export class RequestCreateUser {
+export class CreateUserRequest {
   @IsNotEmpty({
     message: "o atributo 'name' deve ser informado.",
   })

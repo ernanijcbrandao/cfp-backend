@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/infra/database/prisma.service';
-import { RequestCreateTemporaryBlock } from './dto/request-create-temporary-block';
+import { CreateTemporaryBlockRequest } from './dto/create-temporary-block-request';
 import { isAfter } from 'date-fns';
 
 @Injectable()
@@ -29,7 +29,7 @@ export class BlockService {
         });
     }
 
-    private validateRequestCreateTemporaryBlock(request: RequestCreateTemporaryBlock) {
+    private validateCreateTemporaryBlockRequest(request: CreateTemporaryBlockRequest) {
         const requestCompleted = request
             && request.userId
             && request.reason
@@ -41,7 +41,7 @@ export class BlockService {
         }
     }
 
-    private async create(request: RequestCreateTemporaryBlock) {
+    private async create(request: CreateTemporaryBlockRequest) {
         return await this.prisma.blocks.create({
             data: {
               userId: request.userId,
@@ -53,9 +53,9 @@ export class BlockService {
         });
     }
 
-    async createTemporaryBlocking(request: RequestCreateTemporaryBlock) {
+    async createTemporaryBlocking(request: CreateTemporaryBlockRequest) {
         this.disableExpiredLocks();
-        this.validateRequestCreateTemporaryBlock(request);
+        this.validateCreateTemporaryBlockRequest(request);
         this.create(request);
     }
 

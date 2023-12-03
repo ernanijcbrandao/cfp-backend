@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { AuthGuardion } from './auth.guardion';
 import { Role } from './role.decorator';
 import { RoleGuard } from './role.guard';
-import { RequestLogin } from './dto/request-login';
+import LoginRequest from './dto/login-request';
 
 @Controller('auth')
 export class AuthController {
@@ -11,7 +11,7 @@ export class AuthController {
 
   @Post('autenticacao')
   autenticar(@Body() body) {
-    return this.authService.login(new RequestLogin(body.username, body.password));
+    return this.authService.login(new LoginRequest(body.username, body.password));
   }
 
   @Role('admin')

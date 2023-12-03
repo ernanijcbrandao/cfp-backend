@@ -6,11 +6,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/infra/database/prisma.service';
 import { User } from '@prisma/client';
-import { RequestCreateUser } from './dto/request-create-user';
+import { CreateUserRequest } from './dto/create-user-request';
 import { randomUUID } from 'crypto';
-import { RequestUpdateUser } from './dto/request-update-user';
+import { UpdateUserRequest } from './dto/update-user-request';
 import { UserProfile } from './dto/user-profile.enum';
-import { RequestChangePassword } from '../password/dto/request-change-password';
+import { ChangePasswordRequest } from '../password/dto/change-password-request';
 import { UserPasswordChangeRequest } from './dto/user-password-change-request';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class UserService {
     private prisma: PrismaService
   ) {}
 
-  async create(request: RequestCreateUser) {
+  async create(request: CreateUserRequest) {
     const { name, email, login, profile } = request;
 
     await this.validateEmail(email);
@@ -72,7 +72,7 @@ export class UserService {
     });
   }
 
-  async update(id: string, request: RequestUpdateUser) {
+  async update(id: string, request: UpdateUserRequest) {
     const user = await this.prisma.user.findUnique({
       where: {
         id: id,

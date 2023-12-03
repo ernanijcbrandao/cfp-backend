@@ -1,4 +1,4 @@
-export class RequestChangePassword {
+export class ChangePasswordRequest {
 
     constructor (userId: string,
             password: string,
