@@ -18,6 +18,7 @@ import { UpdateUserRequest } from './dto/update-user-request';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { ChangePasswordRequest } from './dto/change-password-request';
+import { UserPasswordChangeRequest } from './dto/user-password-change-request';
 
 @ApiTags('users')
 @Controller('v1/users')
@@ -110,8 +111,10 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'Usuário reativado' })
   @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
   @ApiResponse({ status: 409, description: 'Requisição negada' })
-  async active(@Param('id') id: string) {
+  async activate(@Res() response: Response, 
+      @Param('id') id: string) {
     await this.userService.activate(id);
+    return response.status(HttpStatus.NO_CONTENT).json({});
   }
   
   @Patch('/inactivate/:id')
@@ -119,21 +122,23 @@ export class UserController {
   @ApiResponse({ status: 200, description: 'Usuário inativado' })
   @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
   @ApiResponse({ status: 409, description: 'Requisição negada' })
-  async inactive(@Param('id') id: string) {
+  async inactivate(@Res() response: Response, 
+      @Param('id') id: string) {
     await this.userService.inactivate(id);
+    return response.status(HttpStatus.NO_CONTENT).json({});
   }
 
 
-  @Put('/changePassword/:id')
+  @Put('/:id/changePassword')
   @ApiOperation({ summary: 'Permitir a alteração de senha do usuário' })
   @ApiResponse({ status: 204, description: 'Senha do usuário alterada com sucesso' })
   @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
   @ApiResponse({ status: 409, description: 'Requisição negada' })
   async changePassword(@Res() response: Response, 
       @Param('id') userId: string,
-      @Body() body: ChangePasswordRequest) {
+      @Body() body: UserPasswordChangeRequest) {
     await this.userService.changePassword(userId, body);
-    return response.status(HttpStatus.NO_CONTENT);
+    return response.status(HttpStatus.NO_CONTENT).json({});
   }
   
 

@@ -33,3 +33,13 @@ Content-Type: application/json
 
 PATCH http://localhost:20010/v1/users/activate/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba
 Content-Type: application/json
+
+###
+
+PUT http://localhost:20010/v1/users/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba/changePassword
+Content-Type: application/json
+
+{
+    "name": "usuario teste 004",
+    "profile": "USER"
+}
