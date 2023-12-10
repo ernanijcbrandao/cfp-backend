@@ -7,9 +7,9 @@ import { addDays, addMinutes, isAfter, isBefore } from 'date-fns';
 import { ValidatePasswordRequest } from './dto/validate-password-request';
 import { Password } from '@prisma/client';
 import { ChangePasswordRequest } from './dto/change-password-request';
-import { BlockService } from '../block/block.service';
-import { BlockReason } from '../block/dto/block-reason.enum';
-import { CreateTemporaryBlockRequest } from '../block/dto/create-temporary-block-request';
+import { BlockService } from './block.service';
+import { BlockReason } from './dto/block-reason.enum';
+import { CreateTemporaryBlockRequest } from './dto/create-temporary-block-request';
 
 @Injectable()
 export class PasswordService {
@@ -31,7 +31,7 @@ export class PasswordService {
         return hashedPassword;
     }
 
-    private async comparePasswords(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
+    private comparePasswords(plainTextPassword: string, hashedPassword: string): boolean {
         return bcrypt.compare(plainTextPassword, hashedPassword);
     }
 
@@ -239,7 +239,7 @@ export class PasswordService {
     }
 
     private async registerInvalidAccessDueToInvalidPassword(password: Password) {
-        const register = await this.prisma.password.update({
+        await this.prisma.password.update({
             where: {
                 id: password.id
             },
@@ -267,27 +267,40 @@ export class PasswordService {
      * @param request 
      * @returns 
      */
-    private getPasswordActive(request: ValidatePasswordRequest | ChangePasswordRequest ): Password {
-        this.prisma.password.findFirst({
+    private async getPasswordActive(request: ValidatePasswordRequest | ChangePasswordRequest ): Promise<Password> {
+        const password = await this.prisma.password.findFirst({
             where: {
               userId: request.userId,              
               active: true,
             },
-        }).then(password => {
-            if (!password) {
-                throw new UnauthorizedException('Usuário inválido!');
-            }
-            this.comparePasswords(request.password, password.password).then(valid => {
-                if (!valid) {
-                    this.registerInvalidAccessDueToInvalidPassword(password);
-                    throw new UnauthorizedException('Senha inválida!');
-                }
-            });
-            return password;
-        }).catch(error => {
-            throw new InternalServerErrorException();
         });
-        return null;
+
+        if (!password) {
+            throw new UnauthorizedException('Usuário inválido!');
+        }
+
+        const valid = this.comparePasswords(request.password, password.password);
+        if (!valid) {
+            this.registerInvalidAccessDueToInvalidPassword(password);
+            throw new UnauthorizedException('Senha inválida!');
+        }
+
+        return password;
+    }
+
+    /**
+     * retornar true caso exista alguma senha cadastrada para usuario
+     * , do contrario false
+     * @param userId 
+     * @returns 
+     */
+    async hasPassword(userId: string): Promise<boolean> {
+        const count = await this.prisma.password.count({
+            where: {
+              userId: userId
+            },
+        });
+        return count > 0;
     }
 
     /**
@@ -322,7 +335,7 @@ export class PasswordService {
      */
     async validatePassword(request: ValidatePasswordRequest) {
         this.validateValidatePasswordRequest(request);
-        const password = this.getPasswordActive(request);
+        const password = await this.getPasswordActive(request);
         this.checkExpiredPassword(password);
         this.registerValidAccess(password);
     }

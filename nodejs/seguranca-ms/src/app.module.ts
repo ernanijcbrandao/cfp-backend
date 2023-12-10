@@ -6,8 +6,8 @@ import { DecimalUtilsService } from './util/decimal-utils-service';
 import { UserService } from './core/user/user.service';
 import { AuthModule } from './core/auth/auth.module';
 import { JwtStrategyService } from './core/jwt-strategy/jwt-strategy.service';
-import { PasswordService } from './core/password/password.service';
-import { BlockService } from './core/block/block.service';
+import { PasswordService } from './core/user/password.service';
+import { BlockService } from './core/user/block.service';
 
 @Module({
   imports: [UserModule, AuthModule],

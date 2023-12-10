@@ -4,8 +4,8 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { env } from 'process';
 import { UserService } from '../user/user.service';
-import { BlockService } from '../block/block.service';
-import { PasswordService } from '../password/password.service';
+import { BlockService } from '../user/block.service';
+import { PasswordService } from '../user/password.service';
 import { PrismaService } from 'src/infra/database/prisma.service';
 
 @Module({

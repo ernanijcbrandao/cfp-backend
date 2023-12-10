@@ -10,13 +10,14 @@ import {
   Patch,
   BadRequestException,
   NotFoundException,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserRequest } from './dto/create-user-request';
 import { UpdateUserRequest } from './dto/update-user-request';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { ChangePasswordRequest } from '../password/dto/change-password-request';
+import { ChangePasswordRequest } from './dto/change-password-request';
 
 @ApiTags('users')
 @Controller('v1/users')
@@ -58,7 +59,7 @@ export class UserController {
     const resultList = await this.userService.list(_name, 
       ((_active) ? 'true' === _active : undefined));
 
-    const statusCode = resultList.length > 0 ? 200 : 204;
+    const statusCode = resultList.length > 0 ? HttpStatus.OK : HttpStatus.NO_CONTENT;
 
     return response.status(statusCode).json(resultList.map( (item) => { 
       return {
@@ -110,7 +111,7 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
   @ApiResponse({ status: 409, description: 'Requisição negada' })
   async active(@Param('id') id: string) {
-    await this.userService.active(id);
+    await this.userService.activate(id);
   }
   
   @Patch('/inactivate/:id')
@@ -119,7 +120,7 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
   @ApiResponse({ status: 409, description: 'Requisição negada' })
   async inactive(@Param('id') id: string) {
-    await this.userService.inactive(id);
+    await this.userService.inactivate(id);
   }
 
 
@@ -132,7 +133,7 @@ export class UserController {
       @Param('id') userId: string,
       @Body() body: ChangePasswordRequest) {
     await this.userService.changePassword(userId, body);
-    return response.status(204);
+    return response.status(HttpStatus.NO_CONTENT);
   }
   
 
