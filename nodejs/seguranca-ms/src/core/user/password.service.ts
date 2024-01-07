@@ -253,7 +253,9 @@ export class PasswordService {
     }
 
     private async registerInvalidAccessDueToInvalidPassword(password: Password) {
-        await this.prisma.password.update({
+        console.log('\n\n> debug > PasswordService.registerInvalidAccessDueToInvalidPassword > password -> ', password);
+        console.log('> debug > PasswordService.registerInvalidAccessDueToInvalidPassword > registrar tentativa de acesso invalido por senha errada ');
+        this.prisma.password.update({
             where: {
                 id: password.id
             },
@@ -263,12 +265,15 @@ export class PasswordService {
         }).then(register => {
             const limitUnsuccessful = parseInt(process.env.LIMIT_UNSUCCESSFUL_ACCESS_ATTEMPTS, 10) || -1;
             const blockingExpirationTime = parseInt(process.env.PASSWORD_LOCK_EXPIRATION_TIME, 10) || 10;
+            console.log('> debug > PasswordService.registerInvalidAccessDueToInvalidPassword > apos gravar > receuparar parametros limitUnsuccessful, blockingExpirationTime -> ', limitUnsuccessful, blockingExpirationTime);
+            console.log('> debug > PasswordService.registerInvalidAccessDueToInvalidPassword > apos gravar > register.invalidAttempt -> ', register.invalidAttempt);
 
             if ( (limitUnsuccessful > 0) && (register.invalidAttempt >= limitUnsuccessful)) {
                 const requestBlock = new CreateTemporaryBlockRequest(password.userId,
                     BlockReason.TEMPORARY_BLOCKING_EXCEEDING_INCORRECT_PASSWORD_LIMIT,
                     addMinutes(new Date(), blockingExpirationTime)
                     );
+                console.log('> debug > PasswordService.registerInvalidAccessDueToInvalidPassword > apos gravar > se excedido limite de erros, criar block tmp > requestBlock -> ', requestBlock);
                 this.blocksService.createTemporaryBlocking(requestBlock);
             }
         }).catch(error => {
@@ -297,12 +302,12 @@ export class PasswordService {
             throw new ForbiddenException();
         }
 
-        const valid = this.comparePasswords(request.password, password.password);
+        const valid = await this.comparePasswords(request.password, password.password);
         console.log('> debug > PasswordService.getPasswordActive > 3 > compare passwords request x base -> ', valid);
         if (!valid) {
             console.log('> debug > PasswordService.getPasswordActive > 3.1 > compare false > registrar tentativa invalida');
             console.log('> debug > PasswordService.getPasswordActive > 3.1.1 > registerInvalidAccessDueToInvalidPassword');
-            this.registerInvalidAccessDueToInvalidPassword(password);
+            await this.registerInvalidAccessDueToInvalidPassword(password);
             throw new UnauthorizedException('Senha inválida!');
         }
 
@@ -395,14 +400,14 @@ export class PasswordService {
         console.log('> debug > PasswordService.changePassword > 1 > validateChangePasswordRequest');
         this.validateChangePasswordRequest(request);
         console.log('> debug > PasswordService.changePassword > 2 > getPasswordActive');
-        this.getPasswordActive(request);
+        const passwordRegistered = await this.getPasswordActive(request);
         // TODO demais validacoes de senha atual com senha recuperada e nova senha
         // nao podendo ser senha ja existente no historico
         const requestNewPassword = {
             userId: request.userId,
             password: request.newpassword
         }
-        this.createPassword(requestNewPassword);
+        await this.createPassword(requestNewPassword);
     }
 
 }

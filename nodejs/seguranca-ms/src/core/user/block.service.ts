@@ -54,9 +54,9 @@ export class BlockService {
     }
 
     async createTemporaryBlocking(request: CreateTemporaryBlockRequest) {
-        this.disableExpiredLocks();
+        await this.disableExpiredLocks();
         this.validateCreateTemporaryBlockRequest(request);
-        this.create(request);
+        await this.create(request);
     }
 
     async getBlock(userId: string) {
