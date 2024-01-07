@@ -24,15 +24,22 @@ export class PasswordService {
      * @param password 
      * @returns 
      */
-    private hashPassword(password: string): Promise<string> {
+    private async hashPassword(password: string): Promise<string> {
         const saltRounds = 10;
-        const salt = bcrypt.genSalt(saltRounds);
-        const hashedPassword = bcrypt.hash(password, salt);
+        const salt = await bcrypt.genSalt(saltRounds);
+        const hashedPassword = await bcrypt.hash(password, salt);
         return hashedPassword;
     }
 
-    private comparePasswords(plainTextPassword: string, hashedPassword: string): boolean {
-        return bcrypt.compare(plainTextPassword, hashedPassword);
+    /**
+     * compara senhas
+     * @param plainTextPassword 
+     * @param hashedPassword 
+     * @returns 
+     */
+    private async comparePasswords(plainTextPassword: string, hashedPassword: string): Promise<boolean> {
+        const test = await bcrypt.compare(plainTextPassword, hashedPassword);
+        return test;
     }
 
     /**
@@ -216,12 +223,19 @@ export class PasswordService {
      * @param request
      */
     async createPassword(request: CreatePasswordRequest) {
+        console.log('> debug > createPassword > request -> ', request);
+        console.log('> debug > 1 > validateRequestCreate ');
         this.validateRequestCreate(request);
+        console.log('> debug > 2 > validateMinimumRequirementsForPassword ');
         this.validateMinimumRequirementsForPassword(request.password);
+        console.log('> debug > 3 > checkIfPasswordHasAlreadyRegisteredInTheLatestUpdates ');
         await this.checkIfPasswordHasAlreadyRegisteredInTheLatestUpdates(request);
         // TODO a seguir, implementar aqui o controle transacional, que com prisma eh feito manualmente
+        console.log('> debug > 4 > disableCurrentPassword ');
         await this.disableCurrentPassword(request);
+        console.log('> debug > 5 > addNewPassword ');
         await this.addNewPassword(request);
+        console.log('> debug > 6 > finalizado ');
     }
 
     /**
@@ -268,23 +282,32 @@ export class PasswordService {
      * @returns 
      */
     private async getPasswordActive(request: ValidatePasswordRequest | ChangePasswordRequest ): Promise<Password> {
+        console.log('\n\n> debug > PasswordService.getPasswordActive > request -> ', request);
+        console.log('> debug > PasswordService.getPasswordActive > 1 > consultar na base por senhas ativas para o userId ');
         const password = await this.prisma.password.findFirst({
             where: {
-              userId: request.userId,              
+              userId: request.userId,
               active: true,
             },
         });
 
+        console.log('> debug > PasswordService.getPasswordActive > 2 > result -> ', password);
         if (!password) {
-            throw new UnauthorizedException('Usuário inválido!');
+            console.log('> debug > PasswordService.getPasswordActive > 2.1 > nao ha result -> forbiden ');
+            throw new ForbiddenException();
         }
 
         const valid = this.comparePasswords(request.password, password.password);
+        console.log('> debug > PasswordService.getPasswordActive > 3 > compare passwords request x base -> ', valid);
         if (!valid) {
+            console.log('> debug > PasswordService.getPasswordActive > 3.1 > compare false > registrar tentativa invalida');
+            console.log('> debug > PasswordService.getPasswordActive > 3.1.1 > registerInvalidAccessDueToInvalidPassword');
             this.registerInvalidAccessDueToInvalidPassword(password);
             throw new UnauthorizedException('Senha inválida!');
         }
 
+        console.log('> debug > PasswordService.getPasswordActive > 4 > retornar password encontrada');
+        console.log('\n\n');
         return password;
     }
 
@@ -295,11 +318,15 @@ export class PasswordService {
      * @returns 
      */
     async hasPassword(userId: string): Promise<boolean> {
+        console.log('\n\n> debug > PasswordSerice.hasPassword > userId -> ', userId);
+        console.log('> debug > PasswordSerice.hasPassword > 1 > contar senhas cadastradas para userId ');
         const count = await this.prisma.password.count({
             where: {
               userId: userId
             },
         });
+        console.log('> debug > PasswordSerice.hasPassword > 2 > count -> ', count, (count>0));
+        console.log('\n\n');
         return count > 0;
     }
 
@@ -364,8 +391,13 @@ export class PasswordService {
      * @param request 
      */
     async changePassword(request: ChangePasswordRequest) {
+        console.log('\n\n> debug > PasswordService.changePassword > request -> ', request);
+        console.log('> debug > PasswordService.changePassword > 1 > validateChangePasswordRequest');
         this.validateChangePasswordRequest(request);
+        console.log('> debug > PasswordService.changePassword > 2 > getPasswordActive');
         this.getPasswordActive(request);
+        // TODO demais validacoes de senha atual com senha recuperada e nova senha
+        // nao podendo ser senha ja existente no historico
         const requestNewPassword = {
             userId: request.userId,
             password: request.newpassword

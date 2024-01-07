@@ -40,6 +40,6 @@ PUT http://localhost:20010/v1/users/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba/changeP
 Content-Type: application/json
 
 {
-    "name": "usuario teste 004",
-    "profile": "USER"
+    "password": "Test3@123",
+    "newpassword": "Test3@123"
 }

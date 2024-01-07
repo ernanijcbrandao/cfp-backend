@@ -261,19 +261,26 @@ export class UserService {
    * @param request 
    */
   async changePassword(userId: string, request: UserPasswordChangeRequest) {
+    console.log('\n\n> debug > userService.changePassword > userId, request -> ', userId, request);
+    console.log('> debug > userService.changePassword > 1 > validateChangePasswordRequest');
     this.validateChangePasswordRequest(request);
+    console.log('> debug > userService.changePassword > 2 > loadAndValidateActivity');
     const user = await this.loadAndValidateActivity(userId);
+    console.log('> debug > userService.changePassword > 3 > hasPassword');
     const hasPassword = await this.passwordService.hasPassword(userId);
     if (hasPassword) {
-      this.passwordService.changePassword(new ChangePasswordRequest(
+      console.log('> debug > userService.changePassword > 3.1 > hasPassword > changePassword');
+      await this.passwordService.changePassword(new ChangePasswordRequest(
         userId, 
         request.password, 
         request.newpassword));
     } else {
+      console.log('> debug > userService.changePassword > 3.2 > sem senha cadastrada, validar email == request -> ', user.email, request.password);
       if (user.email !== request.password) {
         throw new ForbiddenException();
       }
-      this.passwordService.createPassword(new CreatePasswordRequest(userId, request.newpassword));
+      console.log('> debug > userService.changePassword > 3.2.1 > createPassword');
+      await this.passwordService.createPassword(new CreatePasswordRequest(userId, request.newpassword));
     }
   }
 
