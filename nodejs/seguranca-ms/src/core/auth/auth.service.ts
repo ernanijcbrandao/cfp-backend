@@ -1,11 +1,11 @@
-import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import { BlockService } from '../user/block.service';
 import { ValidatePasswordRequest } from '../user/dto/validate-password-request';
 import { PasswordService } from '../user/password.service';
 import { UserService } from '../user/user.service';
-import LoginRequest from './dto/login-request';
+import AuthenticateRequest from './dto/authenticate-request';
 
 @Injectable()
 export class AuthService {
@@ -14,59 +14,67 @@ export class AuthService {
     private userService: UserService,
     private blockService: BlockService,
     private passwordService: PasswordService
-    ) {}
+    ) {
+  }
 
-  // fazer o login, buscando dados do user a partir do login e senha
-  // aplicar as validacoes sobre a senha, atividade e possiveis bloqueios
-  login(request: LoginRequest) {
-    // const user = this.validateCredentials(request);
+  /**
+   * validar os dados obrigatorios da requisicao recebida
+   * @param request 
+   */
+  private validateAuthenticateRequest(request: AuthenticateRequest) {
+    const requestCompleted = request
+        && request.username
+        && request.password;
 
+    if (!requestCompleted) {
+        throw new BadRequestException('Dados para autenticação insuficientes!');
+    }
+  }
+
+  private async checkForBlockages(userId: string) {
+    const block = await this.blockService.getBlock(userId);
+    if (block) {
+      throw new UnauthorizedException(block.description); 
+    }
+  }
+
+  /**
+   * validar acesso para username / password informados
+   * - procurar e recuperar dados do usuario para o username informado
+   * - validar veracidade da senha, atividade da mesma
+   * - validar possiveis bloqueios
+   * 
+   * @param request 
+   */
+  private async validateCredentialsAndGeneratePayloadJWT(request: AuthenticateRequest) {
+    const user = await this.userService.loadAndValidateActivityByLogin(request.username);
+    await this.passwordService.validateCurrentPassword(new ValidatePasswordRequest(user.id, request.password));
+    await this.checkForBlockages(user.id);
+    // gerar payload pra retornar
+    return this.createPayload(user);
+  }
+
+  private createPayload(user: User) {
     const payload = {
-      teste: 0 // username: user.login,
+      suject: user.publickey,
+      name: user.name,
+      profile: user.profile,
+    }
+
+    return payload;
+  }
+
+  async authenticate(request: AuthenticateRequest) {
+    this.validateAuthenticateRequest(request);
+    const payload = await this.validateCredentialsAndGeneratePayloadJWT(request);    
+    // console.log('> DEBUG > Payload -> ', payload);
+    // gerar e retornar token para o payload gerado
+    // const payload = {
+    //   teste: 'teste 1'
+    // };
+    return {
+      token: this.jwtService.sign(payload)
     };
-
-    // montar o jwt a ser retornado
-    return this.jwtService.sign(payload);
   }
 
-  private validateLocks(user: User) {
-    this.blockService.getBlock(user.id).then(block => {
-      if (block) {
-        throw new UnauthorizedException('Bloqueio ativo para este usuário!');
-      }
-    }).catch(error => {
-      throw new InternalServerErrorException();
-    });
-  }
-
-  private validatePassword(request: ValidatePasswordRequest) {
-    this.passwordService.validatePassword(request);
-  }
-
-  private validateUser(request: LoginRequest): User {
-    this.userService.findById(request.login).then(user => {
-      if (!user) {
-        throw new UnauthorizedException('Usuário inválido!');
-      }
-      if (!user.active) {
-        throw new UnauthorizedException('Usuário inativo!');
-      }
-
-      this.validateLocks(user);
-      this.validatePassword(new ValidatePasswordRequest(user.id, request.password));
-
-      return user;
-    }).catch(error => {
-      throw new InternalServerErrorException();
-    });
-
-    return null;
-  }
-
-  // buscar na base de dados um user para o username/login e password informados
-  private async validateCredentials(request: LoginRequest) {
-    const user = this.validateUser(request);
-    // TODO criar e devolver token
-  }
-  
 }

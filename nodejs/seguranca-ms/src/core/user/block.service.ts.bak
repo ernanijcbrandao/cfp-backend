@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { isAfter } from 'date-fns';
 import { PrismaService } from 'src/infra/database/prisma.service';
 import { CreateTemporaryBlockRequest } from './dto/create-temporary-block-request';
+import { isAfter } from 'date-fns';
 
 @Injectable()
 export class BlockService {
@@ -12,7 +12,7 @@ export class BlockService {
     
     /**
      * sempre nas requisicoes a este servico, varrer e atualizar os bloqueios temporarios
-     * de maneira a inativa-los sempre que expirados expirados
+     * de maneira a inativa-los com assim expirados
      */
     private async disableExpiredLocks() {
         this.prisma.blocks.updateMany({
@@ -55,15 +55,13 @@ export class BlockService {
 
     async createTemporaryBlocking(request: CreateTemporaryBlockRequest) {
         await this.disableExpiredLocks();
-        // validar o preenchimento dos dados da requisicao
         this.validateCreateTemporaryBlockRequest(request);
-        //
         await this.create(request);
     }
 
     async getBlock(userId: string) {
         await this.disableExpiredLocks();
-        return await this.prisma.blocks.findFirst({
+        return this.prisma.blocks.findFirst({
             where: {
                 userId: userId,
                 active: true

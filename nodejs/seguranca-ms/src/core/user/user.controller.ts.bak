@@ -2,21 +2,23 @@ import {
   Body,
   Controller,
   Get,
-  HttpStatus,
-  NotFoundException,
   Param,
-  Patch,
   Post,
   Put,
   Query,
-  Res
+  Res,
+  Patch,
+  BadRequestException,
+  NotFoundException,
+  HttpStatus,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
+import { UserService } from './user.service';
 import { CreateUserRequest } from './dto/create-user-request';
 import { UpdateUserRequest } from './dto/update-user-request';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
+import { ChangePasswordRequest } from './dto/change-password-request';
 import { UserPasswordChangeRequest } from './dto/user-password-change-request';
-import { UserService } from './user.service';
 
 @ApiTags('users')
 @Controller('v1/users')

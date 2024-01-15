@@ -46,10 +46,10 @@ Content-Type: application/json
 
 ###
 
-POST http://localhost:20010/security/authenticate
+POST http://localhost:20010/authenticate
 Content-Type: application/json
 
 {
     "password": "Test3@123",
-    "username": "Test3@123"
+    "username": "utst3"
 }
