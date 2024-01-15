@@ -1,12 +1,11 @@
 import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { PasswordService } from '../user/password.service';
-import { ValidatePasswordRequest } from '../user/dto/validate-password-request';
-import { UserService } from '../user/user.service';
-import LoginRequest from './dto/login-request';
 import { User } from '@prisma/client';
 import { BlockService } from '../user/block.service';
+import { ValidatePasswordRequest } from '../user/dto/validate-password-request';
+import { PasswordService } from '../user/password.service';
+import { UserService } from '../user/user.service';
+import LoginRequest from './dto/login-request';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +19,7 @@ export class AuthService {
   // fazer o login, buscando dados do user a partir do login e senha
   // aplicar as validacoes sobre a senha, atividade e possiveis bloqueios
   login(request: LoginRequest) {
-    const user = this.validateCredentials(request);
+    // const user = this.validateCredentials(request);
 
     const payload = {
       teste: 0 // username: user.login,

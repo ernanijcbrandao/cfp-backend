@@ -1,14 +1,27 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
+import { JwtModule } from '@nestjs/jwt';
+import { env } from 'process';
 import { PrismaService } from 'src/infra/database/prisma.service';
-import { UserController } from './user.controller';
 import { DecimalUtilsService } from 'src/util/decimal-utils-service';
-import { PasswordService } from './password.service';
 import { BlockService } from './block.service';
+import { PasswordService } from './password.service';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
 
 @Module({
-  imports: [],
+  imports: [
+    JwtModule.register({
+      secret: env.SECRET_PHRASE,
+      signOptions: {
+        expiresIn: env.TIMEOUT_TOKEN,
+      },
+    }),
+  ],
   controllers: [UserController],
-  providers: [UserService, PrismaService, DecimalUtilsService, PasswordService, BlockService],
+  providers: [UserService, 
+    PrismaService, 
+    DecimalUtilsService, 
+    PasswordService, 
+    BlockService],
 })
 export class UserModule {}

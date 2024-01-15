@@ -43,3 +43,13 @@ Content-Type: application/json
     "password": "Test3@123",
     "newpassword": "Test3@123"
 }
+
+###
+
+POST http://localhost:20010/security/authenticate
+Content-Type: application/json
+
+{
+    "password": "Test3@123",
+    "username": "Test3@123"
+}

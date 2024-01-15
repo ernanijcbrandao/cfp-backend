@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { env } from 'process';
-import { UserService } from '../user/user.service';
+import { PrismaService } from 'src/infra/database/prisma.service';
+import { JwtStrategyService } from '../jwt-strategy/jwt-strategy.service';
 import { BlockService } from '../user/block.service';
 import { PasswordService } from '../user/password.service';
-import { PrismaService } from 'src/infra/database/prisma.service';
+import { UserService } from '../user/user.service';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { PrismaService } from 'src/infra/database/prisma.service';
     UserService, 
     BlockService, 
     PasswordService,
-    PrismaService
+    PrismaService,
+    JwtStrategyService
   ],
 })
 export class AuthModule {}
