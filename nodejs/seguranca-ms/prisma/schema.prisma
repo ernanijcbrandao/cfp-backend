@@ -45,3 +45,14 @@ model Blocks {
   active         Boolean
   
 }
+
+model SystemAuthorization {
+  id             Int       @default(autoincrement()) @id
+  userId         String
+  code           String
+  name           String
+  created        DateTime  @default(now())
+  active         Boolean
+  
+  @@unique(fields: [userId, code], name: "systemUserUnique")
+}

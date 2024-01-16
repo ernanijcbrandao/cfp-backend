@@ -5,6 +5,7 @@ import { PrismaService } from 'src/infra/database/prisma.service';
 import { DecimalUtilsService } from 'src/util/decimal-utils-service';
 import { BlockService } from './block.service';
 import { PasswordService } from './password.service';
+import { SystemsService } from './systems.service';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
@@ -22,6 +23,7 @@ import { UserService } from './user.service';
     PrismaService, 
     DecimalUtilsService, 
     PasswordService, 
-    BlockService],
+    BlockService, 
+    SystemsService],
 })
 export class UserModule {}
