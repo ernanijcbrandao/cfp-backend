@@ -13,7 +13,9 @@ export class AuthController {
 
   @Post()
   async authenticate(@Body() body: AuthenticateRequest) {
-    return await this.authService.authenticate(body);
+    const result = await this.authService.authenticate(body);
+    console.log(result);
+    return result;
   }
 
   @Role('admin')
