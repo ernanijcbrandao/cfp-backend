@@ -1,82 +1,143 @@
-import { Body, Controller, Get, Param, Post, Put, Delete, HttpCode, Query, Res, Patch } from '@nestjs/common';
-import { UserService } from './user.service';
-import { RequestCreateUser } from './dto/request-create-user';
-import { RequestUpdateUser } from './dto/request-update-user';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Res
+} from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-
+import { CreateUserRequest } from './dto/create-user-request';
+import { UpdateUserRequest } from './dto/update-user-request';
+import { UserPasswordChangeRequest } from './dto/user-password-change-request';
+import { UserService } from './user.service';
 
 @ApiTags('users')
-@Controller("v1/users")
+@Controller('v1/users')
 export class UserController {
+  constructor(private readonly userService: UserService) {}
 
-    constructor(private readonly userService: UserService) { }
-
-    @Get(':id')
-    @ApiOperation({ summary: 'Carregar os dados de um determinado usuário',  })
-    @ApiResponse({ status: 200, description: 'Dados do usuário' })
-    @ApiResponse({ status: 404, description: 'ID inválido' })
-    async loadById(@Param('id') id: string) {
-        const user = await this.userService.load(id);
-        return {
-            user,
-        };
+  @Get(':id')
+  @ApiOperation({ summary: 'Carregar os dados de um determinado usuário' })
+  @ApiResponse({ status: 200, description: 'Dados do usuário' })
+  @ApiResponse({ status: 404, description: 'ID inválido' })
+  async loadById(@Param('id') id: string) {
+    const data = await this.userService.findById(id);
+    if (!data) {
+      throw new NotFoundException('ID inválido');
     }
+    const {name, email, login, profile, created, lastUpdate, active } = data;
+    return {
+      id,
+      name,
+      email,
+      login,
+      profile,
+      created, 
+      lastUpdate, 
+      active
+    };
+  }
 
-    @Get()
-    @ApiOperation({ summary: 'Listar dados de usuários ativos com opção de filtro por nome',  })
-    @ApiResponse({ status: 200, description: 'Lista de usuários' })
-    @ApiResponse({ status: 204, description: 'Nenhum usuário encontrado' })
-    async list(@Res() response: Response, @Query('name') name?: string) {
-        const users = await this.userService.list(name);
-        const statusCode = users.length > 0 ? 200 : 204;
-        return response.status(statusCode).json({
-            users,
-        });
-    }
+  @Get()
+  @ApiOperation({
+    summary: 'Listar dados de usuários com opção de filtro por nome',
+  })
+  @ApiResponse({ status: 200, description: 'Lista de usuários' })
+  @ApiResponse({ status: 204, description: 'Nenhum usuário encontrado' })
+  async list(@Res() response: Response, 
+      @Query('name') _name?: string,
+      @Query('active') _active?: string) {
 
-    @Post()
-    @ApiOperation({ summary: 'Criar um usuário' })
-    @ApiResponse({ status: 201, description: 'Usuário criad0' })
-    @ApiResponse({ status: 400, description: 'Parâmetro(s) inválido(s)' })
-    async create(@Body() body: RequestCreateUser) {
-        const user = await this.userService.create(body);
-        return {
-            user,
-        };
-    }
+    const resultList = await this.userService.list(_name, 
+      ((_active) ? 'true' === _active : undefined));
 
-    @Put(':id')
-    @ApiOperation({ summary: 'Atualizar dados de um determinado usuário',  })
-    @ApiResponse({ status: 200, description: 'Dados do usuário atualizados' })
-    @ApiResponse({ status: 400, description: 'Parâmetro(s) inválido(s)' })
-    @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
-    @ApiResponse({ status: 406, description: 'Usuário informado está inativo' })
-    @ApiResponse({ status: 409, description: 'Requisição negada' })
-    async update(@Param('id') id: string, @Body() body: RequestUpdateUser) {
-        const user = await this.userService.update(id, body);
-        return {
-            user,
-        };
-    }
+    const statusCode = resultList.length > 0 ? HttpStatus.OK : HttpStatus.NO_CONTENT;
 
-    @Delete(':id')
-    @HttpCode(204)
-    @ApiOperation({ summary: 'Excluir um determinado usuário' })
-    @ApiResponse({ status: 204, description: 'Usuário excluído' })
-    @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
-    @ApiResponse({ status: 409, description: 'Requisição negada' })
-    async delete(@Param('id') id: string) {
-        await this.userService.delete(id);
-    }
+    return response.status(statusCode).json(resultList.map( (item) => { 
+      return {
+        id: item.id, 
+        name: item.name, 
+        email: item.email, 
+        login: item.login, 
+        profile: item.profile, 
+        created: item.created, 
+        lastUpdate: item.lastUpdate, 
+        active: item.active
+      };
+    }));
+  }
 
-    @Patch('/inactive:id')
-    @ApiOperation({ summary: 'Inativar um determinado usuário',  })
-    @ApiResponse({ status: 204, description: 'Usuário inativado' })
-    @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
-    @ApiResponse({ status: 409, description: 'Requisição negada' })
-    async inactive(@Param('id') id: string) {
-        const user = await this.userService.inactive(id);
-    }
+  @Post()
+  @ApiOperation({ summary: 'Criar um usuário' })
+  @ApiResponse({ status: 201, description: 'Usuário criado' })
+  @ApiResponse({ status: 400, description: 'Parâmetro(s) inválido(s)' })
+  async create(@Body() body: CreateUserRequest) {
+    const {id, name, email, login, profile, created, active } =  await this.userService.create(body);
+    return {
+      id,
+      name, 
+      email, 
+      login, 
+      profile, 
+      created
+    };
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Atualizar dados de um determinado usuário' })
+  @ApiResponse({ status: 200, description: 'Dados do usuário atualizados' })
+  @ApiResponse({ status: 400, description: 'Parâmetro(s) inválido(s)' })
+  @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
+  @ApiResponse({ status: 406, description: 'Usuário informado está inativo' })
+  @ApiResponse({ status: 409, description: 'Requisição negada' })
+  async update(@Param('id') id: string, @Body() body: UpdateUserRequest) {
+    const user = await this.userService.update(id, body);
+    return {
+      user,
+    };
+  }
+
+  @Patch('/activate/:id')
+  @ApiOperation({ summary: 'Reativar um determinado usuário' })
+  @ApiResponse({ status: 200, description: 'Usuário reativado' })
+  @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
+  @ApiResponse({ status: 409, description: 'Requisição negada' })
+  async activate(@Res() response: Response, 
+      @Param('id') id: string) {
+    await this.userService.activate(id);
+    return response.status(HttpStatus.NO_CONTENT).json({});
+  }
+  
+  @Patch('/inactivate/:id')
+  @ApiOperation({ summary: 'Inativar um determinado usuário' })
+  @ApiResponse({ status: 200, description: 'Usuário inativado' })
+  @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
+  @ApiResponse({ status: 409, description: 'Requisição negada' })
+  async inactivate(@Res() response: Response, 
+      @Param('id') id: string) {
+    await this.userService.inactivate(id);
+    return response.status(HttpStatus.NO_CONTENT).json({});
+  }
+
+
+  @Put('/:id/changePassword')
+  @ApiOperation({ summary: 'Permitir a alteração de senha do usuário' })
+  @ApiResponse({ status: 204, description: 'Senha do usuário alterada com sucesso' })
+  @ApiResponse({ status: 404, description: 'Usuário informado é inválido' })
+  @ApiResponse({ status: 409, description: 'Requisição negada' })
+  async changePassword(@Res() response: Response, 
+      @Param('id') userId: string,
+      @Body() body: UserPasswordChangeRequest) {
+    await this.userService.changePassword(userId, body);
+    return response.status(HttpStatus.NO_CONTENT).json({});
+  }
+  
 
 }

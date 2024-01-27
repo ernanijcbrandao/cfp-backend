@@ -1,0 +1,3 @@
+# bavkup
+/docs/*.vpp.bak*
+/docs/*.vpp.lck

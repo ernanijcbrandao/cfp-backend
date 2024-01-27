@@ -1,0 +1,55 @@
+POST http://localhost:20010/v1/users
+Content-Type: application/json
+
+{
+    "name": "usuario teste 004",
+    "email": "tst4@testando.com.br",
+    "login": "utst4",
+    "profile": "ADMIN"
+}
+
+###
+GET http://localhost:20010/v1/users/7ff9328f-8a60-4ec9-9c37-137328bfc68b
+
+###
+GET http://localhost:20010/v1/users
+
+###
+
+PUT http://localhost:20010/v1/users/dc8620e7-1516-406d-8f5b-29628d6bbe9a
+Content-Type: application/json
+
+{
+    "name": "usuario teste 004",
+    "profile": "USER"
+}
+
+###
+
+PATCH http://localhost:20010/v1/users/inactivate/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba
+Content-Type: application/json
+
+###
+
+PATCH http://localhost:20010/v1/users/activate/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba
+Content-Type: application/json
+
+###
+
+PUT http://localhost:20010/v1/users/462c6d0a-b0d0-45f8-bcc4-bd9a1d9b14ba/changePassword
+Content-Type: application/json
+
+{
+    "password": "Test3@123",
+    "newpassword": "Test3@123"
+}
+
+###
+
+POST http://localhost:20010/authenticate
+Content-Type: application/json
+
+{
+    "password": "Test3@123",
+    "username": "utst3"
+}

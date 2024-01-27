@@ -25,22 +25,34 @@ model User {
 
 model Password {
   id             Int        @default(autoincrement()) @id
-  user           String
+  userId         String
   password       String
-  reason         String
   expire         DateTime?
+  invalidAttempt Int        @default(0)
   created        DateTime   @default(now())
   active         Boolean
 
-  @@unique(fields: [user, password], name: "passwordUserUnique")
+  @@unique(fields: [userId, password], name: "passwordUserUnique")
 }
 
 model Blocks {
   id             Int       @default(autoincrement()) @id
-  user           String
+  userId         String
   reason         String
+  description    String?
   blocked        DateTime  @default(now())
-  expire         DateTime
+  expire         DateTime?
   active         Boolean
   
+}
+
+model SystemAuthorization {
+  id             Int       @default(autoincrement()) @id
+  userId         String
+  code           String
+  name           String
+  created        DateTime  @default(now())
+  active         Boolean
+  
+  @@unique(fields: [userId, code], name: "systemUserUnique")
 }

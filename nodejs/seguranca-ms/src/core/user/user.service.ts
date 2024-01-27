@@ -1,160 +1,287 @@
-import { BadRequestException, ConflictException, Injectable, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotAcceptableException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/infra/database/prisma.service';
-import { User, Prisma } from '@prisma/client';
-import { RequestCreateUser } from './dto/request-create-user';
+import { User } from '@prisma/client';
+import { CreateUserRequest } from './dto/create-user-request';
 import { randomUUID } from 'crypto';
-import { DecimalUtilsService } from 'src/util/decimal-utils-service';
-import { RequestUpdateUser } from './dto/request-update-use';
+import { UpdateUserRequest } from './dto/update-user-request';
+import { ChangePasswordRequest } from './dto/change-password-request';
+import { UserPasswordChangeRequest } from './dto/user-password-change-request';
+import { PasswordService } from './password.service';
+import { CreatePasswordRequest } from './dto/create-password-request';
 
 @Injectable()
 export class UserService {
 
-  constructor(private prisma: PrismaService, private decimalUtils: DecimalUtilsService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly passwordService: PasswordService
+  ) {}
 
-  async create(request: RequestCreateUser) {
 
-    const { name, description, owner, openingBalance: requestOpeningBalance } = request;
+  /**
+   * validar se 'novo' email ja existe na base de dados.
+   * existindo, uma excecao sera lancada
+   * @param email
+   */
+  private async validateCreateEmail(email: string) {
+    const user = await this.findByEmail(email);
+    if (user) {
+      throw new BadRequestException('E-mail já existente');
+    }
+  }
 
-    return await this.prisma.user.create({
+  /**
+   * validar se 'novo' login ja existe na base de dados.
+   * existindo, uma excecao sera lancada
+   * @param login 
+   */
+  private async validateCreateLogin(login: string) {
+    const user = await this.findByLogin(login);
+    if (user) {
+      throw new BadRequestException('Login já existente');
+    }
+  }
+
+  /**
+   * criar um novo usuario
+   * @param request 
+   * @returns 
+   */
+  async create(request: CreateUserRequest) {
+    const { name, email, login, profile } = request;
+
+    await this.validateCreateEmail(email);
+    await this.validateCreateLogin(login);
+
+    return await this.prismaService.user.create({
       data: {
-          id: randomUUID(),
-          name,
-          description,
-          owner,
-          active: true
-      }
-    });
-
-  }
-
-  async findById(id: string) {
-    return await this.prisma.user.findUnique({
-      where: {
-        id,
+        id: randomUUID(),
+        publickey: randomUUID(),
+        name,
+        email,
+        login,
+        profile,
+        created: new Date(),
+        active: true,
       },
     });
   }
 
-  async findByName(name: string) {
-    return await this.prisma.user.findUnique({
+  /**
+   * pesquisar e retornar os dados de um usuario a partir de seu 'id'
+   * @param value 
+   * @returns 
+   */
+  async findById(value: string) {
+    return await this.prismaService.user.findUnique({
       where: {
-          name,
+        id: value,
       },
     });
   }
 
-  async update(id: string, request: RequestUpdateUser) {
-
-    const user = await this.prisma.user.findUnique({
+  /**
+   * pesquisar e retornar os dados de um usuario a partir de seu 'publickey'
+   * @param value 
+   * @returns 
+   */
+  async findByPublicKey(value: string) {
+    return await this.prismaService.user.findUnique({
       where: {
-        id: id,
+        publickey: value,
       },
     });
+  }
 
+  /**
+   * pesquisar e retornar os dados de um usuario a partir de seu 'login'
+   * @param value 
+   * @returns 
+   */
+  async findByLogin(value: string) {
+    return await this.prismaService.user.findUnique({
+      where: {
+        login: value,
+      },
+    });
+  }
+
+  /**
+   * pesquisar e retornar os dados de um usuario a partir de seu 'email'
+   * @param value 
+   * @returns 
+   */
+  async findByEmail(value: string) {
+    return await this.prismaService.user.findUnique({
+      where: {
+        email: value,
+      },
+    });
+  }
+
+  async loadAndValidateActivityByUserId(userId: string): Promise<User> {
+    const user = await this.findById(userId);
+    await this.validateUser(user);
+    return user;
+  }
+  async loadAndValidateActivityByLogin(login: string): Promise<User> {
+    const user = await this.findByLogin(login);
+    await this.validateUser(user);
+    return user;
+  }
+
+  private async validateUser(user: User) {
     if (!user) {
-      throw new NotFoundException(`ID informado é inválido.`);
+      throw new NotFoundException(`Usuário inválido.`);
     }
 
     if (!user.active) {
-      throw new NotAcceptableException("Este usuário encontra-se inativa");
+      throw new NotAcceptableException('Usuário inativo');
     }
+  }
 
-    const { name, description, owner, openingBalance: requestOpeningBalance } = request;
+  /**
+   * atualizar dados de um determinado usuário
+   * - valida se 'id' informado existe para um usuario cadastrado na base e que esteja ativo
+   * @param id
+   * @param request 
+   * @returns 
+   */
+  async update(id: string, request: UpdateUserRequest) {
+    const user = await this.loadAndValidateActivityByUserId(id);
 
-    if (name && user.name !== name) {
-      const username = await this.prisma.user.findUnique({
-        where: {
-          name,
-        },
-      });
-      if (username) {
-        throw new ConflictException(`O nome da conta informada para alteração \'${name}\'`);
-      }
-    }
+    const { name: nameRequest, profile: profileRequest } = request;
 
-    return await this.prisma.user.update({
+    return await this.prismaService.user.update({
       where: {
         id: id,
       },
       data: {
-          name: (!name ? user.name : name ),
-          lastUpdate: new Date()
-      }
+        name: !nameRequest ? user.name : nameRequest,
+        profile: !profileRequest ? user.profile : profileRequest,
+        lastUpdate: new Date(),
+      },
     });
-
   }
 
-  async delete(id: string) {
-
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`ID informado é inválido.`);
-    }
-
-    // TODO validar se existem movimentacoes atreladas a conta. havendo negar exclusao
-
-    await this.prisma.user.delete({
-      where: {
-        id: id,
-      },
-    });
-
-  }
-
-  async inactive(id: string) {
-
-    const user = await this.prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
+  /**
+   * tornar um usuário pré existente na base ativo
+   * - caso o mesmo nao exista na base ou ja esteja ativo uma excecao sera lancada
+   * @param id 
+   * @returns 
+   */
+  async activate(id: string) {
+    const user = await this.findById(id);
 
     if (!user) {
-      throw new NotFoundException(`ID informado é inválido.`);
+      throw new NotFoundException(`ID inválido.`);
     }
 
-    return await this.prisma.user.update({
+    if (user.active) {
+      throw new NotAcceptableException('Usuário já está ativo');
+    }
+
+    return await this.prismaService.user.update({
       where: {
         id: id,
       },
       data: {
-          active: false,
-          lastUpdate: new Date()
-      }
+        active: true,
+        lastUpdate: new Date(),
+      },
     });
-
   }
 
-  async load(id: string) {
+  /**
+   * tornar um usuário pré existente na base inativo
+   * - caso o mesmo nao exista na base ou ja esteja inativo uma excecao sera lancada
+   * @param id 
+   * @returns 
+   */
+  async inactivate(id: string) {
+    const user = await this.findById(id);
 
-    const user = await this.prisma.user.findUnique({
+    if (!user) {
+      throw new NotFoundException(`ID inválido.`);
+    }
+
+    if (!user.active) {
+      throw new NotAcceptableException('Usuário já está inativo');
+    }
+
+    return await this.prismaService.user.update({
       where: {
         id: id,
       },
-    });
-
-    if (!user) {
-      throw new NotFoundException(`ID informado é inválido.`);
-    }
-
-    return user;
-
-  }
-
-  async list(name?: string): Promise<User[]> {
-
-    return await this.prisma.user.findMany({
-      where: {
-        name: name ? {contains: name} : undefined,
-        active: true
+      data: {
+        active: false,
+        lastUpdate: new Date(),
       },
     });
+  }
 
+  /**
+   * listar usuarios cadastrados
+   * - podera efetuar a consulta incremental por parte do nome do usuario
+   * - podera efetuar a consulta considerando apenas usuarios ativos ou inativos
+   * @param name 
+   * @param active 
+   * @returns 
+   */
+  async list(name?: string, active?: boolean): Promise<User[]> {
+    return await this.prismaService.user.findMany({
+      where: {
+        name: name ? { contains: name } : undefined,
+        active: active,
+      },
+    });
+  }
+
+  /**
+   * validar se senha atual e nova senha foram informadas
+   * @param request 
+   */
+  private validateChangePasswordRequest(request: UserPasswordChangeRequest) {
+    const requestCompleted = request
+        && request.newpassword
+        && request.password;
+
+    if (!requestCompleted) {
+        throw new BadRequestException('Requisição para alteração de senha é insuficiente!');
+    }
+}
+
+  /**
+   * realizar alteracao de senha do usuario
+   * - valida se usuario informado existe e esta ativo, caso negativo lancara excecao
+   * - validara senha atual
+   * - validara nova senha com ultimas senhas usadas nas ultimas alteracoes conforme configuracao
+   * - caso usuario ainda nao possua senha cadastrada utilizara o valor do email para validacao 
+   *   como senha atual
+   * @param userId 
+   * @param request 
+   */
+  async changePassword(userId: string, request: UserPasswordChangeRequest) {
+    this.validateChangePasswordRequest(request);
+    const user = await this.loadAndValidateActivityByUserId(userId);
+    const hasPassword = await this.passwordService.hasPassword(userId);
+    if (hasPassword) {
+      await this.passwordService.changePassword(new ChangePasswordRequest(
+        userId, 
+        request.password, 
+        request.newpassword));
+    } else {
+      if (user.email !== request.password) {
+        throw new ForbiddenException();
+      }
+      await this.passwordService.createPassword(new CreatePasswordRequest(userId, request.newpassword));
+    }
   }
 
 }
