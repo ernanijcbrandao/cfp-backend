@@ -67,11 +67,6 @@ export class AuthService {
   async authenticate(request: AuthenticateRequest) {
     this.validateAuthenticateRequest(request);
     const payload = await this.validateCredentialsAndGeneratePayloadJWT(request);    
-    // console.log('> DEBUG > Payload -> ', payload);
-    // gerar e retornar token para o payload gerado
-    // const payload = {
-    //   teste: 'teste 1'
-    // };
     return {
       token: this.jwtService.sign(payload)
     };
