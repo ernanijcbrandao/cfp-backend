@@ -1,4 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { AuthModule } from './core/auth/auth.module';
 import { JwtStrategyService } from './core/jwt-strategy/jwt-strategy.service';
 import { CorsMiddleware } from './core/middleware/cors-middleware';
@@ -11,7 +12,14 @@ import { PrismaService } from './infra/database/prisma.service';
 import { DecimalUtilsService } from './util/decimal-utils-service';
 
 @Module({
-  imports: [UserModule, AuthModule],
+  imports: [
+    // JwtModule.register({
+    //   secret: process.env.SECRET_PHRASE,
+    //   signOptions: {
+    //     expiresIn: process.env.TIMEOUT_TOKEN,
+    //   },
+    // }),
+    UserModule, AuthModule],
   controllers: [UserController],
   providers: [
     UserService,
@@ -20,6 +28,7 @@ import { DecimalUtilsService } from './util/decimal-utils-service';
     JwtStrategyService,
     PasswordService,
     BlockService,
+    JwtService
   ],
 })
 export class AppModule implements NestModule {

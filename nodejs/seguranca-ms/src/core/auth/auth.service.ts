@@ -10,10 +10,10 @@ import AuthenticateRequest from './dto/authenticate-request';
 @Injectable()
 export class AuthService {
   constructor(
-    private jwtService: JwtService,
-    private userService: UserService,
-    private blockService: BlockService,
-    private passwordService: PasswordService
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly blockService: BlockService,
+    private readonly passwordService: PasswordService
     ) {
   }
 
@@ -66,7 +66,10 @@ export class AuthService {
 
   async authenticate(request: AuthenticateRequest) {
     this.validateAuthenticateRequest(request);
-    const payload = await this.validateCredentialsAndGeneratePayloadJWT(request);    
+    const payload = await this.validateCredentialsAndGeneratePayloadJWT(request);
+    
+    console.log('> DEBUG > AuthService > jwtService -> ', this.jwtService);
+
     return {
       token: this.jwtService.sign(payload)
     };

@@ -10,6 +10,7 @@ export class JwtStrategyService extends PassportStrategy(Strategy, 'jwt') {
       ignoreExpiration: false,
       secretOrKey: process.env.SECRET_PHRASE,
     });
+    console.log('> DEBUG > JwtStrategyService > process.env.SECRET_PHRASE -> ', process.env.SECRET_PHRASE);
   }
 
   async validate(payload) {

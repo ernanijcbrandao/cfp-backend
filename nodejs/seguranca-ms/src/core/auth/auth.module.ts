@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { env } from 'process';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/infra/database/prisma.service';
 import { JwtStrategyService } from '../jwt-strategy/jwt-strategy.service';
 import { BlockService } from '../user/block.service';
@@ -12,9 +11,9 @@ import { AuthService } from './auth.service';
 @Module({
   imports: [
     JwtModule.register({
-      secret: env.SECRET_PHRASE,
+      secret: process.env.SECRET_PHRASE,
       signOptions: {
-        expiresIn: env.TIMEOUT_TOKEN,
+        expiresIn: process.env.TIMEOUT_TOKEN,
       },
     }),
   ],
@@ -24,7 +23,8 @@ import { AuthService } from './auth.service';
     BlockService, 
     PasswordService,
     PrismaService,
-    JwtStrategyService
+    JwtStrategyService,
+    JwtService
   ],
 })
 export class AuthModule {}
