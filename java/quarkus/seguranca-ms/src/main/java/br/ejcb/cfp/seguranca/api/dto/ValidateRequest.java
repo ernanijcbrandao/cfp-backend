@@ -1,4 +1,4 @@
-package br.ejcb.cfp.seguranca.resource.dto;
+package br.ejcb.cfp.seguranca.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,9 +13,9 @@ import lombok.With;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CodeMessageResponse {
+public class ValidateRequest {
 	
-	private Long code;
-	private String message;
+	private String accessToken;
+	private String refreshToken;
 
 }

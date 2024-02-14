@@ -1,19 +1,16 @@
-package br.ejcb.cfp.seguranca.service;
+package br.ejcb.cfp.seguranca.usercase;
 
 import java.util.Optional;
 
-import br.ejcb.cfp.seguranca.model.Block;
-import br.ejcb.cfp.seguranca.model.Password;
-import br.ejcb.cfp.seguranca.model.User;
+import br.ejcb.cfp.seguranca.api.dto.AuthenticateRequest;
+import br.ejcb.cfp.seguranca.api.dto.AuthenticateResponse;
+import br.ejcb.cfp.seguranca.api.dto.ValidateRequest;
+import br.ejcb.cfp.seguranca.domain.Block;
+import br.ejcb.cfp.seguranca.domain.Password;
+import br.ejcb.cfp.seguranca.domain.User;
 import br.ejcb.cfp.seguranca.repository.PasswordRepository;
 import br.ejcb.cfp.seguranca.repository.UserRepository;
-import br.ejcb.cfp.seguranca.resource.dto.AuthenticateRequest;
-import br.ejcb.cfp.seguranca.resource.dto.AuthenticateResponse;
-import br.ejcb.cfp.seguranca.resource.dto.ValidateRequest;
-import br.ejcb.cfp.seguranca.resource.exceptions.AuthenticateException;
-import br.ejcb.cfp.seguranca.resource.exceptions.BlockException;
 import br.ejcb.cfp.seguranca.resource.exceptions.PasswordException;
-import br.ejcb.cfp.seguranca.resource.exceptions.ValidationException;
 import br.ejcb.cfp.seguranca.resource.validation.AuthenticateValidation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -23,21 +20,24 @@ import jakarta.transaction.Transactional.TxType;
 @ApplicationScoped
 public class AuthService {
 	
-	private UserRepository userRepository;
-	private PasswordRepository passwordRepository;
-	private BlockService blockService;
+	private final UserRepository userRepository;
+	private final PasswordRepository passwordRepository;
+	private final BlockService blockService;
+	private final JwtService jwtService;
 	
 	@Inject
 	public AuthService(UserRepository userRepository,
 			PasswordRepository passwordRepository,
-			BlockService blockService) {
+			BlockService blockService,
+			JwtService jwtService) {
 		this.userRepository = userRepository;
 		this.passwordRepository = passwordRepository;
 		this.blockService = blockService;
+		this.jwtService = jwtService;
 	}
 
 	@Transactional
-	public AuthenticateResponse authenticate(AuthenticateRequest request) throws ValidationException, AuthenticateException, PasswordException, BlockException {
+	public AuthenticateResponse authenticate(AuthenticateRequest request) throws Exception {
 		// validar dados da requisicao
 		AuthenticateValidation.validate(request);
 		
@@ -52,25 +52,45 @@ public class AuthService {
 		
 		// recuperar todas as senhas de historico do usuario, inclusice a ativa
 		Optional<Password> password = this.passwordRepository.loadActivePassword(user.get());
+		
+		AuthenticateResponse response = AuthenticateResponse.create();
 		try {
 			AuthenticateValidation.validate(password.get(), request);
+			
+			response.withAccessToken(
+					jwtService.generateToken(user.get().getName(),
+							user.get().getProfile(),
+							"system-code", // TODO 
+							"system-name", // TODO
+							user.get().getPublicKey().toString(),
+							1200l, // TODO 20 min -> 20 * 60 => 1200 seg
+							"https://seguranca-be-ms.cfp.ejcb.br/")) // criado access token
+			.withRefreshToken(
+					jwtService.generateToken(user.get().getName(),
+							user.get().getProfile(), 
+							"system-code", // TODO 
+							"system-name", // TODO 
+							user.get().getPublicKey().toString(),
+							3600l, // TODO 1 h -> 60 min -> 60 * 60 => 3600 seg
+							"https://seguranca-be-ms.cfp.ejcb.br/")); // criado refresh token
+	
 		} catch (PasswordException e) {
 			this.registerInvalidAccessAttempt(password);
 			throw e;
 		}
 		
-		return null;
+		return response;
 	}
 
 	@Transactional(value = TxType.REQUIRES_NEW)
-	private void registerInvalidAccessAttempt(Optional<Password> password) {
+	void registerInvalidAccessAttempt(Optional<Password> password) {
 		if (password.isPresent()) {
 			passwordRepository.persistAndFlush(password.get().incrementalInvalidAttempt());
 		}
 	}
 
 	@Transactional(value = TxType.REQUIRES_NEW)
-	private void registerValidAccess(Password password) {
+	void registerValidAccess(Password password) {
 		passwordRepository.persistAndFlush(password.resetInvalidAttempt());
 	}
 

@@ -1,10 +1,9 @@
-package br.ejcb.cfp.seguranca.resource.dto;
+package br.ejcb.cfp.seguranca.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.With;
 
 @Getter
@@ -12,11 +11,9 @@ import lombok.With;
 @With
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-public class AuthenticateRequest {
-	
-	private String username;
-	private String password;
-	private String systemCode;
+public class ChangePasswordRequest {
 
+	private String password;
+	private String newPassword;
+	
 }

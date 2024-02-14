@@ -1,4 +1,4 @@
-package br.ejcb.cfp.seguranca.resource.dto;
+package br.ejcb.cfp.seguranca.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

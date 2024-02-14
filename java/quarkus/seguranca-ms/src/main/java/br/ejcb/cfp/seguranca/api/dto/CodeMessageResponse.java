@@ -1,4 +1,4 @@
-package br.ejcb.cfp.seguranca.resource.dto;
+package br.ejcb.cfp.seguranca.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,13 +13,9 @@ import lombok.With;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class UserFilter {
+public class CodeMessageResponse {
 	
-	private String userId;
-	private String login;
-	
-	public static synchronized UserFilter create() {
-		return new UserFilter();
-	}
+	private Long code;
+	private String message;
 
 }

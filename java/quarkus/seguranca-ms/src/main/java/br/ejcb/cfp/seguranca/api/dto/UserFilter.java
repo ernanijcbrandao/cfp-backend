@@ -1,4 +1,4 @@
-package br.ejcb.cfp.seguranca.resource.dto;
+package br.ejcb.cfp.seguranca.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,9 +13,13 @@ import lombok.With;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ValidateRequest {
+public class UserFilter {
 	
-	private String accessToken;
-	private String refreshToken;
+	private Long userId;
+	private String login;
+	
+	public static synchronized UserFilter create() {
+		return new UserFilter();
+	}
 
 }

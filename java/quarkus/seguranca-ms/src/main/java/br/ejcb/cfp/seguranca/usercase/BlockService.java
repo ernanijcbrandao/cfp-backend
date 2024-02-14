@@ -1,11 +1,11 @@
-package br.ejcb.cfp.seguranca.service;
+package br.ejcb.cfp.seguranca.usercase;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import br.ejcb.cfp.seguranca.model.Block;
-import br.ejcb.cfp.seguranca.model.User;
+import br.ejcb.cfp.seguranca.domain.Block;
+import br.ejcb.cfp.seguranca.domain.User;
 import br.ejcb.cfp.seguranca.repository.BlockRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

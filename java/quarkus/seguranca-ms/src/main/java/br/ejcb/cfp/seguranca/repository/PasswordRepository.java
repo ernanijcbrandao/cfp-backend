@@ -2,8 +2,8 @@ package br.ejcb.cfp.seguranca.repository;
 
 import java.util.Optional;
 
-import br.ejcb.cfp.seguranca.model.Password;
-import br.ejcb.cfp.seguranca.model.User;
+import br.ejcb.cfp.seguranca.domain.Password;
+import br.ejcb.cfp.seguranca.domain.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 

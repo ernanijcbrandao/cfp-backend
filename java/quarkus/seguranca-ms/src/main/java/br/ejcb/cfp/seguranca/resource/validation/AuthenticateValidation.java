@@ -2,10 +2,10 @@ package br.ejcb.cfp.seguranca.resource.validation;
 
 import java.time.LocalDateTime;
 
-import br.ejcb.cfp.seguranca.model.Block;
-import br.ejcb.cfp.seguranca.model.Password;
-import br.ejcb.cfp.seguranca.model.User;
-import br.ejcb.cfp.seguranca.resource.dto.AuthenticateRequest;
+import br.ejcb.cfp.seguranca.api.dto.AuthenticateRequest;
+import br.ejcb.cfp.seguranca.domain.Block;
+import br.ejcb.cfp.seguranca.domain.Password;
+import br.ejcb.cfp.seguranca.domain.User;
 import br.ejcb.cfp.seguranca.resource.exceptions.AuthenticateException;
 import br.ejcb.cfp.seguranca.resource.exceptions.BlockException;
 import br.ejcb.cfp.seguranca.resource.exceptions.PasswordException;
