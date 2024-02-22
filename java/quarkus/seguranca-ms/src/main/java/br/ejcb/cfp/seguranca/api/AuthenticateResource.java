@@ -2,13 +2,13 @@ package br.ejcb.cfp.seguranca.api;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import br.ejcb.cfp.seguranca.api.dto.AuthenticateRequest;
-import br.ejcb.cfp.seguranca.api.dto.AuthenticateResponse;
-import br.ejcb.cfp.seguranca.api.dto.ValidateRequest;
-import br.ejcb.cfp.seguranca.resource.exceptions.AuthenticateException;
-import br.ejcb.cfp.seguranca.resource.exceptions.BlockException;
-import br.ejcb.cfp.seguranca.resource.exceptions.PasswordException;
-import br.ejcb.cfp.seguranca.resource.exceptions.ValidationException;
+import br.ejcb.cfp.seguranca.application.dto.AuthenticateRequest;
+import br.ejcb.cfp.seguranca.application.dto.AuthenticateResponse;
+import br.ejcb.cfp.seguranca.application.dto.ValidateRequest;
+import br.ejcb.cfp.seguranca.application.exceptions.AuthenticateException;
+import br.ejcb.cfp.seguranca.application.exceptions.BlockException;
+import br.ejcb.cfp.seguranca.application.exceptions.PasswordException;
+import br.ejcb.cfp.seguranca.application.exceptions.ValidationException;
 import br.ejcb.cfp.seguranca.usercase.AuthService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.enterprise.context.ApplicationScoped;

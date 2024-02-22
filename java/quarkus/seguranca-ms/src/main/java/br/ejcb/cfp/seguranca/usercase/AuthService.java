@@ -2,16 +2,16 @@ package br.ejcb.cfp.seguranca.usercase;
 
 import java.util.Optional;
 
-import br.ejcb.cfp.seguranca.api.dto.AuthenticateRequest;
-import br.ejcb.cfp.seguranca.api.dto.AuthenticateResponse;
-import br.ejcb.cfp.seguranca.api.dto.ValidateRequest;
-import br.ejcb.cfp.seguranca.domain.Block;
-import br.ejcb.cfp.seguranca.domain.Password;
-import br.ejcb.cfp.seguranca.domain.User;
-import br.ejcb.cfp.seguranca.repository.PasswordRepository;
-import br.ejcb.cfp.seguranca.repository.UserRepository;
-import br.ejcb.cfp.seguranca.resource.exceptions.PasswordException;
-import br.ejcb.cfp.seguranca.resource.validation.AuthenticateValidation;
+import br.ejcb.cfp.seguranca.application.dto.AuthenticateRequest;
+import br.ejcb.cfp.seguranca.application.dto.AuthenticateResponse;
+import br.ejcb.cfp.seguranca.application.dto.ValidateRequest;
+import br.ejcb.cfp.seguranca.application.exceptions.PasswordException;
+import br.ejcb.cfp.seguranca.application.validation.AuthenticateValidation;
+import br.ejcb.cfp.seguranca.domain.entity.Block;
+import br.ejcb.cfp.seguranca.domain.entity.Password;
+import br.ejcb.cfp.seguranca.domain.entity.User;
+import br.ejcb.cfp.seguranca.infra.repository.PasswordRepository;
+import br.ejcb.cfp.seguranca.infra.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
