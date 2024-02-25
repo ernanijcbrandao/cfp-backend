@@ -1,6 +1,6 @@
 package br.ejcb.cfp.seguranca.application.usecase.user;
 
-import br.ejcb.cfp.seguranca.application.dto.UserResponse;
+import br.ejcb.cfp.seguranca.application.dto.user.UserResponse;
 
 public interface ILoadUserByIdUseCase {
 	

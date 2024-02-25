@@ -22,4 +22,40 @@ public final class UserMessage {
 		return utils.getProperty("already.user.for.this.email");
 	}
 	
+	public String userNotFound() {
+		return utils.getProperty("user.not.found");
+	}
+	
+	public String userInactive() {
+		return utils.getProperty("user.inactive");
+	}
+	
+	public String userActive() {
+		return utils.getProperty("user.active");
+	}
+	
+	public String successUserInactivate() {
+		return utils.getProperty("success.user.inactivate");
+	}
+	
+	public String successUserActivate() {
+		return utils.getProperty("success.user.activate");
+	}
+	
+	public String requestChangePasswordInsufficient() {
+		return utils.getProperty("request.change.password.invalid");
+	}
+
+	public String passwordInvalid() {
+		return utils.getProperty("password.invalid");
+	}
+
+	public String newPasswordUsedLastUpdates() {
+		return utils.getProperty("newpassword.used.last.updates");
+	}
+	
+	public String successChangePassword() {
+		return utils.getProperty("success.change.password");
+	}
+
 }

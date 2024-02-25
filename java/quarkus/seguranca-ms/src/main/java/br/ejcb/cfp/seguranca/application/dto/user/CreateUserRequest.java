@@ -1,4 +1,4 @@
-package br.ejcb.cfp.seguranca.application.dto;
+package br.ejcb.cfp.seguranca.application.dto.user;
 
 import br.ejcb.cfp.seguranca.common.enumeration.UserProfile;
 import jakarta.validation.constraints.Email;
@@ -16,7 +16,7 @@ import lombok.With;
 @With
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateUserRequest {
+public class CreateUserRequest {
 
 	@NotEmpty(message = "O atributo 'name' deve ser informado")
 	@Size(min = 10, max = 100, message = "O atributo 'name' deve ser preenchido e possuir um tamanho entre 10 e 100 caracteres")
@@ -25,6 +25,10 @@ public class UpdateUserRequest {
 	@NotEmpty(message = "O atributo 'email' deve ser informado")
 	@Email(message = "'email' informado é inválido")
 	private String email;
+
+	@NotEmpty(message = "O atributo 'login' deve ser informado")
+	@Size(min = 10, max = 50, message = "O atributo 'login' deve ser preenchido e possuir um tamanho entre 10 e 50 caracteres")
+	private String login;
 
 	@NotNull(message = "O atributo 'profile' deve ser informado")
 	private UserProfile profile;

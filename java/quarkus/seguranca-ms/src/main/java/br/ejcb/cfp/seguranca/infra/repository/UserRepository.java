@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import br.ejcb.cfp.seguranca.application.dto.SearchUsersFilter;
+import br.ejcb.cfp.seguranca.application.dto.user.SearchUsersFilter;
 import br.ejcb.cfp.seguranca.common.enumeration.UserProfile;
 import br.ejcb.cfp.seguranca.domain.entity.User;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;

@@ -3,7 +3,7 @@ package br.ejcb.cfp.seguranca.application.service.user;
 import java.util.Optional;
 
 import br.ejcb.cfp.seguranca.application.converter.UserConverter;
-import br.ejcb.cfp.seguranca.application.dto.UserResponse;
+import br.ejcb.cfp.seguranca.application.dto.user.UserResponse;
 import br.ejcb.cfp.seguranca.application.usecase.user.ILoadUserByIdUseCase;
 import br.ejcb.cfp.seguranca.domain.entity.User;
 import jakarta.enterprise.context.ApplicationScoped;

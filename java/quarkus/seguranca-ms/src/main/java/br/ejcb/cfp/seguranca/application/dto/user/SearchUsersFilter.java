@@ -1,4 +1,4 @@
-package br.ejcb.cfp.seguranca.application.dto;
+package br.ejcb.cfp.seguranca.application.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

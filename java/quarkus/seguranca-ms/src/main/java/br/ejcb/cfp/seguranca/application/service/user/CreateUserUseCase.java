@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import br.ejcb.cfp.seguranca.application.converter.UserConverter;
-import br.ejcb.cfp.seguranca.application.dto.CreateUserRequest;
-import br.ejcb.cfp.seguranca.application.dto.UserResponse;
+import br.ejcb.cfp.seguranca.application.dto.user.CreateUserRequest;
+import br.ejcb.cfp.seguranca.application.dto.user.UserResponse;
 import br.ejcb.cfp.seguranca.application.exceptions.UseCaseException;
 import br.ejcb.cfp.seguranca.application.exceptions.ValidationException;
 import br.ejcb.cfp.seguranca.application.message.UserMessage;
 import br.ejcb.cfp.seguranca.application.usecase.user.ICreateUserUseCase;
 import br.ejcb.cfp.seguranca.application.validation.ConstraintBeanValidation;
-import br.ejcb.cfp.seguranca.application.validation.CreateUserValidation;
+import br.ejcb.cfp.seguranca.application.validation.UserValidation;
 import br.ejcb.cfp.seguranca.domain.entity.User;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -35,13 +35,13 @@ public class CreateUserUseCase implements ICreateUserUseCase {
 		
 		ConstraintBeanValidation.validate(request);
 
-		CreateUserValidation.validatePreExistenceUser(service.loadByLogin(request.getLogin()), 
+		UserValidation.validatePreExistenceUser(service.loadByLogin(request.getLogin()), 
 				messages.alreadyUserForThisLogin());
 		
-		CreateUserValidation.validatePreExistenceUser(service.loadByName(request.getName()), 
+		UserValidation.validatePreExistenceUser(service.loadByName(request.getName()), 
 				messages.alreadyUserForThisName());
 		
-		CreateUserValidation.validatePreExistenceUser(service.loadByEmail(request.getEmail()), 
+		UserValidation.validatePreExistenceUser(service.loadByEmail(request.getEmail()), 
 				messages.alreadyUserForThisEmail());
 
 		User user = UserConverter.toEntity(request)

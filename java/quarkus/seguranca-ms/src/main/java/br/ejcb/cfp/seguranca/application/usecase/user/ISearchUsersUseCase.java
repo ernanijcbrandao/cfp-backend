@@ -2,8 +2,8 @@ package br.ejcb.cfp.seguranca.application.usecase.user;
 
 import java.util.List;
 
-import br.ejcb.cfp.seguranca.application.dto.SearchUsersFilter;
-import br.ejcb.cfp.seguranca.application.dto.UserResponse;
+import br.ejcb.cfp.seguranca.application.dto.user.SearchUsersFilter;
+import br.ejcb.cfp.seguranca.application.dto.user.UserResponse;
 import br.ejcb.cfp.seguranca.application.exceptions.NotFoundException;
 import br.ejcb.cfp.seguranca.application.exceptions.ValidationException;
 

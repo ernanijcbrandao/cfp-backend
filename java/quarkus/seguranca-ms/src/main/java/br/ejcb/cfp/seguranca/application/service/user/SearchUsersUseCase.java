@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 
-import br.ejcb.cfp.seguranca.application.dto.SearchUsersFilter;
-import br.ejcb.cfp.seguranca.application.dto.UserResponse;
+import br.ejcb.cfp.seguranca.application.dto.user.SearchUsersFilter;
+import br.ejcb.cfp.seguranca.application.dto.user.UserResponse;
 import br.ejcb.cfp.seguranca.application.exceptions.NotFoundException;
 import br.ejcb.cfp.seguranca.application.exceptions.ValidationException;
 import br.ejcb.cfp.seguranca.application.usecase.user.ISearchUsersUseCase;

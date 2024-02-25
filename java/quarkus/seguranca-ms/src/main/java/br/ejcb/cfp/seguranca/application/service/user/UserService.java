@@ -3,7 +3,7 @@ package br.ejcb.cfp.seguranca.application.service.user;
 import java.util.List;
 import java.util.Optional;
 
-import br.ejcb.cfp.seguranca.application.dto.SearchUsersFilter;
+import br.ejcb.cfp.seguranca.application.dto.user.SearchUsersFilter;
 import br.ejcb.cfp.seguranca.domain.entity.User;
 import br.ejcb.cfp.seguranca.infra.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -19,7 +19,10 @@ public class UserService {
 		this.repository = repository;
 	}
 	
-	public void save(User user)  {
+	public void save(User user) {
+		if (user.getId() != null) {
+			user = repository.getEntityManager().merge(user);
+		}
 		repository.persistAndFlush(user);
 	}
 	

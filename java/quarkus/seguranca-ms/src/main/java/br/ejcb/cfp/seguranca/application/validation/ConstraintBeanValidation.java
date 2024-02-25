@@ -18,7 +18,7 @@ public class ConstraintBeanValidation {
 	public static <T> void validate(T bean) throws ValidationException {
 		
 		if (bean == null) {
-			throw new ValidationException("Nenhum dados foi não informado!");
+			throw new ValidationException("Nenhum dado foi não informado!");
 		}
 		
 		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
