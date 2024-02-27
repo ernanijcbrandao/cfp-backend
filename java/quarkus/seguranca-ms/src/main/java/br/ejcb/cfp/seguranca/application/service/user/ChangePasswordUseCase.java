@@ -93,11 +93,11 @@ public class ChangePasswordUseCase implements IChangePasswordUseCase {
 	 * @param request
 	 * @throws PasswordException
 	 */
-	private void validateNewPasswordInHistory(final List<Password> passwords, final ChangePasswordRequest request) throws PasswordException {
+	private void validateNewPasswordInHistory(final List<Password> passwords, final ChangePasswordRequest request) throws UseCaseException {
 		if (passwords != null) {
 			for (Password password : passwords) {
 				if (PasswordHashingUtils.verifyPassword(request.getNewPassword(), password.getPassword()) ) {
-					throw new PasswordException(messages.newPasswordUsedLastUpdates());
+					throw new UseCaseException(messages.newPasswordUsedLastUpdates());
 				}
 			}
 		}

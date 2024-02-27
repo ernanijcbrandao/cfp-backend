@@ -43,12 +43,12 @@ public class AuthService {
 		
 		// validar existencia do usuario
 		Optional<User> user = this.userRepository.loadByLogin(request.getUsername());
-		AuthenticateValidation.validate(user.get());
+		AuthenticateValidation.validate(user);
 		
-		// remover possiveis bloquios expirados e verificar se existe algum bloqueio ativo
+		// remover possiveis bloqueios expirados e verificar se existe algum bloqueio ativo
 		blockService.disableExpiredLocks(user.get());
 		Optional<Block> block = blockService.loadFirstBlock(user.get());
-		AuthenticateValidation.validate(block.get());
+		AuthenticateValidation.validateBlocks(block);
 		
 		// recuperar todas as senhas de historico do usuario, inclusice a ativa
 		Optional<Password> password = this.passwordRepository.loadActivePassword(user.get());
@@ -57,15 +57,15 @@ public class AuthService {
 		try {
 			AuthenticateValidation.validate(password.get(), request);
 			
-			response.withAccessToken(
+			response.setAccessToken(
 					jwtService.generateToken(user.get().getName(),
 							user.get().getProfile(),
 							"system-code", // TODO 
 							"system-name", // TODO
 							user.get().getPublicKey().toString(),
 							1200l, // TODO 20 min -> 20 * 60 => 1200 seg
-							"https://seguranca-be-ms.cfp.ejcb.br/")) // criado access token
-			.withRefreshToken(
+							"https://seguranca-be-ms.cfp.ejcb.br/")); // criado access token
+			response.setRefreshToken(
 					jwtService.generateToken(user.get().getName(),
 							user.get().getProfile(), 
 							"system-code", // TODO 

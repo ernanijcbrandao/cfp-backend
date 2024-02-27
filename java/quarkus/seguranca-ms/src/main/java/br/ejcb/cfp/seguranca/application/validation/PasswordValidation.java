@@ -1,8 +1,5 @@
 package br.ejcb.cfp.seguranca.application.validation;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import br.ejcb.cfp.seguranca.application.dto.ChangePasswordRequest;
 import br.ejcb.cfp.seguranca.application.exceptions.ValidationException;
 
@@ -10,6 +7,12 @@ public class PasswordValidation {
 
 	/**
 	 * validar preenchimento informacoes necessarias para troca de senha
+	 * valida requisitos minimos para a nova senha
+	 * - conter no minimo uma letra minuscula
+	 * - conter no minimo uma letra maiuscula
+	 * - conter no minimo um digito
+	 * - conter no minimo um caracter especial '!@#$%¨&_-=+'
+	 * - possuir um tamanho minimo de 8 e maximo de 50 caracteres
 	 * @param request senha atual e senha candidata a troca
 	 * @throws ValidationException
 	 */
@@ -17,29 +20,59 @@ public class PasswordValidation {
 		boolean valid = request != null
 				&& request.getPassword() != null && !request.getPassword().isEmpty()
 				&& request.getNewPassword() != null && !request.getNewPassword().isEmpty()
-				&& minimumRequirements(request);
+				&& minimumSmallLetters(request)
+				&& minimumCapitalLetters(request)
+				&& minimumDigits(request)
+				&& minimumSpecialCharacter(request)
+				&& minAndMaxLength(request);
 		if (!valid) {
 			throw new ValidationException(message);
 		}
 	}
 	
-	/**
-	 * valida requisitos minimos para uma senha
-	 * - conter no minimo uma letra minuscula
-	 * - conter no minimo uma letra maiuscula
-	 * - conter no minimo um digito
-	 * - conter no minimo um caracter especial '!@#$%¨&_-=+'
-	 * - possuir um tamanho minimo de 8 e maximo de 50 caracteres
-	 * @param request
-	 * @return resultado de requisitos alcansados ou nao
-	 */
-	private static boolean minimumRequirements(ChangePasswordRequest request) {
-		String regExpn = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&+-_=])(?=\\S+$).{8,50}$";
+	private static boolean minimumSmallLetters(ChangePasswordRequest request) {
+		boolean valid = false;
+		for (int position=0; position<request.getNewPassword().length() && !valid; position++) {
+			char charCompare = request.getNewPassword().charAt(position);
+			valid = charCompare >= 'a' && charCompare <= 'z';
+		}
+		return valid;
+	}
+	
+	private static boolean minimumCapitalLetters(ChangePasswordRequest request) {
+		boolean valid = false;
+		for (int position=0; position<request.getNewPassword().length() && !valid; position++) {
+			char charCompare = request.getNewPassword().charAt(position);
+			valid = charCompare >= 'A' && charCompare <= 'Z';
+		}
+		return valid;
+	}
 
-	    Pattern pattern = Pattern.compile(regExpn, Pattern.CASE_INSENSITIVE);
-	    Matcher matcher = pattern.matcher(request.getNewPassword());
-	    
-	    return matcher.matches();
+	private static boolean minimumDigits(ChangePasswordRequest request) {
+		boolean valid = false;
+		for (int position=0; position<request.getNewPassword().length() && !valid; position++) {
+			char charCompare = request.getNewPassword().charAt(position);
+			valid = charCompare >= '0' && charCompare <= '9';
+		}
+		return valid;
+	}
+
+	private static char[] charactersSpecial = new char[] {'!','@','#','$','%','^','~','&','(',')','_','+','=','-'};
+	private static boolean minimumSpecialCharacter(ChangePasswordRequest request) {
+		boolean valid = false;
+		for (int position=0; position<request.getNewPassword().length() && !valid; position++) {
+			char charCompare = request.getNewPassword().charAt(position);
+			for (int elementPos = 0; elementPos < charactersSpecial.length && !valid; elementPos++) {
+				valid = charCompare == charactersSpecial[elementPos];
+			}
+		}
+		return valid;
+	}
+
+	private static boolean minAndMaxLength(ChangePasswordRequest request) {
+		boolean valid = request.getNewPassword().length() >= 8 
+				&& request.getNewPassword().length() <= 50;
+		return valid;
 	}
 
 }

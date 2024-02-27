@@ -22,6 +22,7 @@ import br.ejcb.cfp.seguranca.application.usecase.user.IChangePasswordUseCase;
 import br.ejcb.cfp.seguranca.application.usecase.user.ICreateUserUseCase;
 import br.ejcb.cfp.seguranca.application.usecase.user.IInactivateUserUseCase;
 import br.ejcb.cfp.seguranca.application.usecase.user.ILoadUserByIdUseCase;
+import br.ejcb.cfp.seguranca.application.usecase.user.IResetPasswordUseCase;
 import br.ejcb.cfp.seguranca.application.usecase.user.ISearchUsersUseCase;
 import br.ejcb.cfp.seguranca.application.usecase.user.IUpdateUserUseCase;
 import jakarta.annotation.security.PermitAll;
@@ -47,6 +48,7 @@ public class UserResource {
 	ILoadUserByIdUseCase loadUserByIdUseCase;
 	ISearchUsersUseCase listUsersUseCase;
 	IChangePasswordUseCase changePasswordUseCase;
+	IResetPasswordUseCase resetPasswordUseCase;
 	
 	UserMessage messages;
 
@@ -58,6 +60,7 @@ public class UserResource {
 			ILoadUserByIdUseCase loadUserByIdUseCase,
 			ISearchUsersUseCase listUsersUseCase,
 			IChangePasswordUseCase changePasswordUseCase,
+			IResetPasswordUseCase resetPasswordUseCase,
 			UserMessage messages) {
 		this.createUseCase = createUseCase;
 		this.updateUseCase = updateUseCase;
@@ -66,6 +69,7 @@ public class UserResource {
 		this.loadUserByIdUseCase = loadUserByIdUseCase;
 		this.listUsersUseCase = listUsersUseCase;
 		this.changePasswordUseCase = changePasswordUseCase;
+		this.resetPasswordUseCase = resetPasswordUseCase;
 		this.messages = messages;
 	}
 
@@ -277,6 +281,37 @@ public class UserResource {
 					).build();
 		} catch (PasswordException e) {
 			result = ResponseBuilder.create(Status.UNAUTHORIZED,
+					response.withMessage(e.getMessage())
+					).build();
+		} catch (Exception e) {
+			result = ResponseBuilder.create(Status.INTERNAL_SERVER_ERROR,
+					response.withMessage(e.getMessage())
+					).build();
+		}
+
+		return result;		
+    }
+
+	@PermitAll
+	@PUT
+	@Path("/{userId}/resetPassword")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+    public RestResponse<Response<Void>> reset(@PathParam("userId") Long userId) {
+		RestResponse<Response<Void>> result = null;
+		Response<Void> response = Response.create();
+		
+		try {
+			resetPasswordUseCase.resetPassword(userId);
+			result = ResponseBuilder.create(Status.NO_CONTENT, 
+					response.withMessage(messages.successChangePassword())
+					).build();
+		} catch (ValidationException e) {
+			result = ResponseBuilder.create(Status.BAD_REQUEST,
+					response.withMessage(e.getMessage())
+					).build();
+		} catch (UseCaseException e) {
+			result = ResponseBuilder.create(Status.BAD_REQUEST,
 					response.withMessage(e.getMessage())
 					).build();
 		} catch (Exception e) {

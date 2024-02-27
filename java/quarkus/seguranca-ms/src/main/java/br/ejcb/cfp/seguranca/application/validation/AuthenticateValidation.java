@@ -1,6 +1,7 @@
 package br.ejcb.cfp.seguranca.application.validation;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import br.ejcb.cfp.seguranca.application.dto.AuthenticateRequest;
 import br.ejcb.cfp.seguranca.application.exceptions.AuthenticateException;
@@ -48,11 +49,11 @@ public class AuthenticateValidation {
 	 * @param user
 	 * @throws AuthenticateException
 	 */
-	public static void validate(final User user) throws AuthenticateException {
-		if (user == null) {
+	public static void validate(final Optional<User> user) throws AuthenticateException {
+		if (user.isEmpty()) {
 			throw new AuthenticateException("'usuário' inválido!");
 		}
-		if (!Boolean.TRUE.equals(user.getActive())) {
+		if (!Boolean.TRUE.equals(user.get().getActive())) {
 			throw new AuthenticateException("'usuário' inativo!");
 		}
 	}
@@ -98,9 +99,9 @@ public class AuthenticateValidation {
 	 * @param block
 	 * @throws BlockException 
 	 */
-	public static void validate(Block block) throws BlockException {
-		if (block != null) {
-			throw new BlockException(block.getReason());
+	public static void validateBlocks(Optional<Block> block) throws BlockException {
+		if (block.isPresent()) {
+			throw new BlockException(block.get().getReason());
 		}
 	}
 	

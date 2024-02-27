@@ -18,8 +18,8 @@ public class ChangePasswordRequest {
 	@NotEmpty(message = "O atributo 'password' deve ser informado")
 	private String password;
 	
-	@NotEmpty(message = "O atributo 'newpassword' deve ser informado")
-	@Size(min = 8, max = 50, message = "O atributo 'newpassword' deve ser preenchido e possuir um tamanho entre 8 e 50 caracteres")
+	@NotEmpty(message = "O atributo 'newPassword' deve ser informado")
+	@Size(min = 8, max = 50, message = "O atributo 'newPassword' deve ser preenchido e possuir um tamanho entre 8 e 50 caracteres")
 	private String newPassword;
 	
 }

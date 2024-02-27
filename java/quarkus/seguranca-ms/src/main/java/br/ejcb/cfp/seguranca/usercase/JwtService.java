@@ -48,7 +48,7 @@ public class JwtService {
 		claimsBuilder.claim("systemCode", systemCode);
 		claimsBuilder.claim("systemName", systemName);
 		if (publickey != null && !publickey.isBlank()) {
-			claimsBuilder.claim("publickey", PasswordHashingUtils.hashPassword(publickey));
+			claimsBuilder.claim("publickey", publickey); //PasswordHashingUtils.hashPassword(publickey));
 		}
 		claimsBuilder.claim("seckey", "" + randomkey);
 		claimsBuilder.groups(groups);

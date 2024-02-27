@@ -58,4 +58,8 @@ public final class UserMessage {
 		return utils.getProperty("success.change.password");
 	}
 
+	public String successResetPassword() {
+		return utils.getProperty("success.reset.password");
+	}
+	
 }
