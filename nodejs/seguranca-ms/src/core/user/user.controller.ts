@@ -138,6 +138,5 @@ export class UserController {
     await this.userService.changePassword(userId, body);
     return response.status(HttpStatus.NO_CONTENT).json({});
   }
-  
 
 }

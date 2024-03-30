@@ -46,7 +46,7 @@ model Blocks {
   
 }
 
-model SystemAuthorization {
+model AuthorizedSystems {
   id             Int       @default(autoincrement()) @id
   userId         String
   code           String
