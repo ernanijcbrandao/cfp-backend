@@ -26,6 +26,7 @@ import br.ejcb.cfp.seguranca.application.usecase.user.IResetPasswordUseCase;
 import br.ejcb.cfp.seguranca.application.usecase.user.ISearchUsersUseCase;
 import br.ejcb.cfp.seguranca.application.usecase.user.IUpdateUserUseCase;
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -73,8 +74,8 @@ public class UserResource {
 		this.messages = messages;
 	}
 
-	@PermitAll
 	@POST
+	@RolesAllowed({"ROOT","ADMIN"})
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
     public RestResponse<Response<UserResponse>> create(CreateUserRequest request) {

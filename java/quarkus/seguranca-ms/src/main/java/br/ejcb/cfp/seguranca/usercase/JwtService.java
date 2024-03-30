@@ -10,7 +10,6 @@ import java.util.Random;
 import java.util.Set;
 
 import br.ejcb.cfp.seguranca.common.enumeration.UserProfile;
-import br.ejcb.cfp.seguranca.common.util.PasswordHashingUtils;
 import io.smallrye.jwt.build.Jwt;
 import io.smallrye.jwt.build.JwtClaimsBuilder;
 import jakarta.enterprise.context.ApplicationScoped;
